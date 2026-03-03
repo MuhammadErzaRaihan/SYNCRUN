@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,9 +23,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 // Import komponen Bottom Bar Anda
-import com.example.syncrun.ui.theme.component.NavMenu
 import com.example.syncrun.ui.theme.component.SyncRunBottomBar
 
 // --- TEMA WARNA LOKAL ---
@@ -38,14 +37,19 @@ private val TextGray = Color(0xFF9E9E9E)
 private val PinkGradient = Brush.horizontalGradient(listOf(Color(0xFFFF5252), Color(0xFFFF1744)))
 
 @Composable
-fun HomeScreen() {
-    var currentNavMenu by remember { mutableStateOf(NavMenu.HOME) }
+fun HomeScreen(
+    viewModel: HomeViewModel = viewModel()
+) {
+    val currentNavMenu by viewModel.currentNavMenu.collectAsState()
+    val currentWeight by viewModel.currentWeight.collectAsState()
+    val totalKm by viewModel.totalKm.collectAsState()
+    val targetWeight by viewModel.targetWeight.collectAsState()
 
     Scaffold(
         bottomBar = {
             SyncRunBottomBar(
                 currentRoute = currentNavMenu,
-                onItemClick = { currentNavMenu = it },
+                onItemClick = { viewModel.updateNavMenu(it) },
                 onFabClick = { /* Buka AI Coach */ }
             )
         },
@@ -59,28 +63,20 @@ fun HomeScreen() {
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // 1. HEADER
             item { HomeHeader() }
-
-            // 2. STATISTIK
-            item { StatsRow() }
-
-            // 3. DAILY CHECK-IN BANNER
+            item {
+                // Passing data dari viewmodel ke komponen statistik
+                StatsRow(
+                    currentWeight = currentWeight,
+                    totalKm = totalKm,
+                    targetWeight = targetWeight
+                )
+            }
             item { CheckInBanner() }
-
-            // 4. TODAY'S SESSION
             item { TodaySessionCard() }
-
-            // 5. THIS WEEK (JADWAL)
             item { ThisWeekSection() }
-
-            // 6. QUICK ACTIONS (GRID BUTTONS)
             item { QuickActionsSection() }
-
-            // 7. RUNNING ACADEMY (CAROUSEL)
             item { RunningAcademySection() }
-
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
@@ -115,14 +111,14 @@ fun HomeHeader() {
 }
 
 @Composable
-fun StatsRow() {
+fun StatsRow(currentWeight: String, totalKm: String, targetWeight: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard(modifier = Modifier.weight(1f), value = "111", label = "CURRENT KG", valueColor = YellowAccent)
-        StatCard(modifier = Modifier.weight(1f), value = "0", label = "TOTAL KM", valueColor = CyanAccent)
-        StatCard(modifier = Modifier.weight(1f), value = "100", label = "TARGET KG", valueColor = Color.White)
+        StatCard(modifier = Modifier.weight(1f), value = currentWeight, label = "CURRENT KG", valueColor = YellowAccent)
+        StatCard(modifier = Modifier.weight(1f), value = totalKm, label = "TOTAL KM", valueColor = CyanAccent)
+        StatCard(modifier = Modifier.weight(1f), value = targetWeight, label = "TARGET KG", valueColor = Color.White)
     }
 }
 
@@ -208,7 +204,6 @@ fun ThisWeekSection() {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Dummy List Jadwal
         ScheduleItem("SUN", "Long Run: 10km", "🏃")
         ScheduleItem("MON", "Rest Day", "😴")
         ScheduleItem("TUE", "Easy Run: 5km", "🏃")
@@ -295,7 +290,6 @@ fun AcademyCard(title: String, desc: String, imageColor: Color) {
             .background(CardBackground)
             .clickable { }
     ) {
-        // Placeholder for Image
         Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(imageColor)) {
             Icon(
                 Icons.Default.BookmarkBorder, contentDescription = null, tint = Color.White,
@@ -315,5 +309,5 @@ fun AcademyCard(title: String, desc: String, imageColor: Color) {
 @Preview(showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(viewModel = HomeViewModel())
 }

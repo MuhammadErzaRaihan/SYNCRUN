@@ -1,5 +1,6 @@
 package com.example.syncrun.ui.theme.screen.Home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,16 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.HealthAndSafety
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,15 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// Mengambil komponen Bottom Bar dari package yang Anda sebutkan
-import com.example.syncrun.ui.theme.component.NavMenu
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.ui.theme.component.SyncRunBottomBar
 
 // --- DEFINISI WARNA LOKAL ---
@@ -45,38 +34,19 @@ private val CyanAccent = Color(0xFF00E5FF)
 private val YellowAccent = Color(0xFFC6FF00)
 private val TextGray = Color(0xFF9E9E9E)
 
-// --- DATA CLASS UNTUK DUMMY PRODUCT ---
-data class GearProduct(
-    val category: String,
-    val title: String,
-    val rating: String,
-    val price: String,
-    val headerColor: Color,
-    val icon: ImageVector
-)
-
 @Composable
 fun GearScreen(
+    viewModel: GearViewModel = viewModel(),
     onBackClick: () -> Unit = {}
 ) {
-    // State untuk Bottom Navigation Bar
-    var currentNavMenu by remember { mutableStateOf(NavMenu.HOME) }
-
-    // Dummy Data Produk (Sebagai Placeholder)
-    val products = listOf(
-        GearProduct("RUNNING SHOES", "Nike Air Zoom Pegasus 40", "4.8", "Rp 1.899.000", Color(0xFFFF4081), Icons.Default.DirectionsRun),
-        GearProduct("RECOVERY TOOLS", "Foam Roller - Muscle Recovery", "4.9", "Rp 185.000", Color(0xFF00B0FF), Icons.Default.TrackChanges),
-        GearProduct("APPAREL", "Running Compression Socks", "4.6", "Rp 125.000", Color(0xFFFFEA00), Icons.Default.Checkroom),
-        GearProduct("NUTRITION", "Energy Gel Pack (12pcs)", "4.7", "Rp 220.000", Color(0xFFB388FF), Icons.Default.FlashOn),
-        GearProduct("TECH", "GPS Running Watch", "4.8", "Rp 2.450.000", Color(0xFF37474F), Icons.Default.Watch),
-        GearProduct("SAFETY", "Reflective Safety Vest", "4.5", "Rp 85.000", Color(0xFFFF6D00), Icons.Default.HealthAndSafety)
-    )
+    val currentNavMenu by viewModel.currentNavMenu.collectAsState()
+    val products by viewModel.products.collectAsState()
 
     Scaffold(
         bottomBar = {
             SyncRunBottomBar(
                 currentRoute = currentNavMenu,
-                onItemClick = { currentNavMenu = it },
+                onItemClick = { viewModel.updateNavMenu(it) },
                 onFabClick = { /* Aksi Tombol AI Coach */ }
             )
         },
@@ -173,7 +143,7 @@ fun GearScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF3E232B)) // Warna kemerahan gelap
+                            .background(Color(0xFF3E232B))
                             .border(1.dp, Color(0xFF5A323E), RoundedCornerShape(8.dp))
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -208,14 +178,12 @@ fun ProductCard(product: GearProduct) {
             .clip(RoundedCornerShape(12.dp))
             .background(CardBackground)
     ) {
-        // Bagian Atas (Warna Background & Icon)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
                 .background(product.headerColor)
         ) {
-            // Label Kategori
             Box(
                 modifier = Modifier
                     .padding(8.dp)
@@ -230,7 +198,6 @@ fun ProductCard(product: GearProduct) {
                     fontWeight = FontWeight.Bold
                 )
             }
-            // Icon Produk di tengah
             Icon(
                 imageVector = product.icon,
                 contentDescription = product.title,
@@ -241,7 +208,6 @@ fun ProductCard(product: GearProduct) {
             )
         }
 
-        // Bagian Bawah (Info & Tombol)
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
                 text = product.title,
@@ -266,7 +232,6 @@ fun ProductCard(product: GearProduct) {
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Tombol "Buy on Shopee"
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -292,8 +257,9 @@ fun ProductCard(product: GearProduct) {
 }
 
 // --- PREVIEW ---
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showSystemUi = true)
 @Composable
 fun GearScreenPreview() {
-    GearScreen()
+    GearScreen(viewModel = GearViewModel())
 }

@@ -31,6 +31,9 @@ fun Setup2Screen(
     val easyPace by viewModel.easyPace.collectAsState()
     val isCalculated by viewModel.isCalculated.collectAsState()
 
+    val intervalPace by viewModel.intervalPace.collectAsState()
+    val longRunPace by viewModel.longRunPace.collectAsState()
+
     Column(modifier = Modifier.fillMaxSize().background(DarkBackground).padding(24.dp)) {
         SetupProgressBar(currentStep = 2)
 
@@ -40,16 +43,16 @@ fun Setup2Screen(
             SetupTextField("AVERAGE EASY PACE", easyPace, "e.g., 00:00", "/km", true) { viewModel.updatePace(it) }
             Spacer(modifier = Modifier.height(24.dp))
 
-            // AI Paces Result Boxes
             Text("INTERVAL PACE", color = TextGray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            PaceResultBox(isCalculated, "Interval: 06:00 /km ✨")
+
+            PaceResultBox(isCalculated, "Interval: $intervalPace /km ✨")
 
             Spacer(modifier = Modifier.height(16.dp))
             Text("LONG RUN PACE", color = TextGray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            PaceResultBox(isCalculated, "Long Run: 07:30 /km ✨")
-            Spacer(modifier = Modifier.height(32.dp))
+
+            PaceResultBox(isCalculated, "Long Run: $longRunPace /km ✨")
 
             if (!isCalculated) {
                 Button(
