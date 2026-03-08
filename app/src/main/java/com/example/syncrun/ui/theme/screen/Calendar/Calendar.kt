@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.NightlightRound
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -183,6 +184,7 @@ fun CalendarDayItem(
         "REST" -> Color(0xFFB388FF) // Ungu/Biru
         "STRENGTH" -> Color(0xFFFF5252) // Merah
         "INTERVAL", "LONG RUN" -> CyanAccent
+        "CLASS" -> Color(0xFFFF9800) // Warna Oranye untuk Jadwal Kuliah
         "EASY RUN" -> YellowAccent
         else -> Color.Transparent
     }
@@ -235,6 +237,7 @@ fun WorkoutDetailCard(workout: WorkoutSession) {
         "REST" -> Icons.Default.NightlightRound to Color(0xFFB388FF)
         "STRENGTH" -> Icons.Default.FitnessCenter to Color(0xFFFF5252)
         "INTERVAL", "LONG RUN" -> Icons.Default.Timer to CyanAccent
+        "CLASS" -> Icons.Default.School to Color(0xFFFF9800) // Ikon & Warna untuk Kelas
         else -> Icons.Default.DirectionsRun to YellowAccent
     }
 
@@ -280,7 +283,10 @@ fun WorkoutDetailCard(workout: WorkoutSession) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (workout.type != "REST") {
+        if (workout.type == "CLASS") {
+            workout.time?.let { WorkoutMetric(label = "TIME", value = it) }
+            Text("University Schedule", color = TextGray, fontSize = 14.sp)
+        } else if (workout.type != "REST") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -313,6 +319,7 @@ fun WorkoutDetailCard(workout: WorkoutSession) {
         }
     }
 }
+
 
 @Composable
 fun WorkoutMetric(label: String, value: String) {
