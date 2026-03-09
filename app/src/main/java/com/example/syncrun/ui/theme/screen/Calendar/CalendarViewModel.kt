@@ -1,9 +1,12 @@
 package com.example.syncrun.ui.theme.screen.calendar
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.syncrun.data.ScheduleRepository
 import com.example.syncrun.ui.theme.component.NavMenu
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 // Data class untuk sesi latihan
 data class WorkoutSession(
@@ -19,28 +22,25 @@ class CalendarViewModel : ViewModel() {
     private val _currentNavMenu = MutableStateFlow(NavMenu.CALENDAR)
     val currentNavMenu = _currentNavMenu.asStateFlow()
 
-    // State Hari yang Dipilih (Default hari ini: 15)
     private val _selectedDate = MutableStateFlow(15)
     val selectedDate = _selectedDate.asStateFlow()
 
-    // Dummy List Hari dalam 1 Bulan (Oktober: 31 Hari)
-    // Angka 0 di awal array ini untuk memberikan 'padding' hari kosong jika awal bulan tidak mulai di hari Minggu.
-    // Misalnya Oktober 2026 mulai di hari Kamis, kita kasih padding kosong.
     val calendarDays = (1..31).toList()
 
-    // Dummy Jadwal Latihan (Key = Tanggal, Value = List Sesi)
-    private val _schedule = MutableStateFlow(
-        mapOf(
-            12 to listOf(WorkoutSession("EASY RUN", "Recovery Run", "5.0 km", "30:00", "06:00/km", true)),
-            13 to listOf(WorkoutSession("STRENGTH", "Lower Body & Core", duration = "45:00", isCompleted = true)),
-            14 to listOf(WorkoutSession("REST", "Active Recovery & Stretching")),
-            15 to listOf(WorkoutSession("INTERVAL", "Track Speed Work", "7.0 km", "50:00", "04:45/km", false)),
-            16 to listOf(WorkoutSession("EASY RUN", "Base Building", "8.0 km", "50:00", "06:15/km")),
-            17 to listOf(WorkoutSession("REST", "Rest Day")),
-            18 to listOf(WorkoutSession("LONG RUN", "Sunday Long", "15.0 km", "1:30:00", "06:30/km"))
-        )
-    )
+    private val _schedule = MutableStateFlow<Map<Int, List<WorkoutSession>>>(emptyMap())
     val schedule = _schedule.asStateFlow()
+
+    // State untuk Dialog Add Event
+    private val _showAddEventDialog = MutableStateFlow(false)
+    val showAddEventDialog = _showAddEventDialog.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            ScheduleRepository.schedule.collect {
+                _schedule.value = it
+            }
+        }
+    }
 
     fun updateNavMenu(menu: NavMenu) {
         _currentNavMenu.value = menu
@@ -48,5 +48,20 @@ class CalendarViewModel : ViewModel() {
 
     fun selectDate(date: Int) {
         _selectedDate.value = date
+    }
+
+    fun toggleAddEventDialog(show: Boolean) {
+        _showAddEventDialog.value = show
+    }
+
+    fun addNewClass(title: String, time: String) {
+        val newSession = WorkoutSession(
+            type = "CLASS",
+            title = title,
+            duration = time,
+            isCompleted = false
+        )
+        ScheduleRepository.addSingleEvent(_selectedDate.value, newSession)
+        _showAddEventDialog.value = false
     }
 }

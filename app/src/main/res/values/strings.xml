@@ -1,3 +1,119 @@
 <resources>
     <string name="app_name">SYNCRUN</string>
+    <string name="calendar_month_year">FEBRUARY 2026</string>
+    <string name="day_sun">SUN</string>
+    <string name="day_mon">MON</string>
+    <string name="day_tue">TUE</string>
+    <string name="day_wed">WED</string>
+    <string name="day_thu">THU</string>
+    <string name="day_fri">FRI</string>
+    <string name="day_sat">SAT</string>
+    <string name="no_schedule">No schedule for this day.</string>
+    <string name="add_event_title">Add Course Schedule</string>
+    <string name="course_name_label">Course Name</string>
+    <string name="time_example_label">Time (Example: 09:00 - 11:00)</string>
+    <string name="save_button">SAVE</string>
+    <string name="cancel_button">CANCEL</string>
+    <string name="time_prefix">Time: %1$s</string>
+    <string name="workout_type_class">CLASS</string>
+    <string name="workout_type_rest">REST</string>
+    <string name="workout_type_strength">STRENGTH</string>
+    <string name="workout_type_interval">INTERVAL</string>
+    <string name="workout_type_long_run">LONG RUN</string>
+    <string name="workout_type_easy_run">EASY RUN</string>
+    <string name="settings_title">Settings</string>
+    <string name="dark_mode_label">Dark Mode</string>
+    <string name="language_label">Language</string>
+    <string name="select_language">Select Language</string>
+
+    <!-- Home Screen -->
+    <string name="good_evening">GOOD EVENING</string>
+    <string name="current_kg">CURRENT KG</string>
+    <string name="total_km">TOTAL KM</string>
+    <string name="target_kg">TARGET KG</string>
+    <string name="start_your_day">START YOUR DAY</string>
+    <string name="daily_checkin_desc">Complete daily check-in</string>
+    <string name="todays_session">TODAY\'S SESSION</string>
+    <string name="rest_day">Rest Day</string>
+    <string name="afternoon_clear_tip">Since your afternoon schedule is clear, let\'s get moving!</string>
+    <string name="this_week">THIS WEEK</string>
+    <string name="training_cycle">TRAINING CYCLE</string>
+    <string name="nutrition">NUTRITION</string>
+    <string name="log_run">LOG RUN</string>
+    <string name="progress">PROGRESS</string>
+    <string name="workouts">WORKOUTS</string>
+    <string name="gear_store">GEAR STORE</string>
+    <string name="running_academy">RUNNING ACADEMY</string>
+    <string name="learn_and_grow">LEARN &amp; GROW</string>
+
+    <!-- Login Screen -->
+    <string name="slogan">SYNCHRONIZE • TRAIN • DOMINATE</string>
+    <string name="ai_powered_training">AI-powered training</string>
+    <string name="smart_scheduling">Smart scheduling</string>
+    <string name="budget_optimized_nutrition">Budget-optimized nutrition</string>
+    <string name="continue_with_gmail">CONTINUE WITH GMAIL</string>
+    <string name="skip_login_prototype">Skip Login (Prototype Mode)</string>
+
+    <!-- Setup Screens -->
+    <string name="setup_progress">SETUP PROGRESS</string>
+    <string name="next_button">NEXT</string>
+    <string name="finish_button">FINISH</string>
+    <string name="name_label">NAME</string>
+    <string name="current_weight_label">CURRENT WEIGHT (KG)</string>
+    <string name="target_weight_label">TARGET WEIGHT (KG)</string>
+    <string name="goal_label">GOAL</string>
+    <string name="profile_goals_title">Profile &amp; Goals</string>
+    <string name="set_targets_subtitle">SET YOUR AMBITIOUS TARGETS</string>
+    <string name="goal_placeholder">What is your main target?</string>
+
+    <string name="running_baseline_title">Running Baseline</string>
+    <string name="ai_calibration_subtitle">AI FOUNDATION CALIBRATION</string>
+    <string name="avg_easy_pace_label">AVERAGE EASY PACE</string>
+    <string name="interval_pace_label">INTERVAL PACE</string>
+    <string name="long_run_pace_label">LONG RUN PACE</string>
+    <string name="calculate_ai_paces">CALCULATE AI PACES</string>
+    <string name="calibration_complete">AI CALIBRATION COMPLETE</string>
+    <string name="calibration_complete_desc">Your paces have been calculated.</string>
+    <string name="waiting_ai_calc">Waiting for AI calculation...</string>
+
+    <string name="class_schedule_ocr_title">Class Schedule OCR</string>
+    <string name="ai_vision_subtitle">AI VISION TECHNOLOGY</string>
+    <string name="krs_upload_success">KRS SUCCESSFULLY READ</string>
+    <string name="upload_krs_screenshot">UPLOAD KRS SCREENSHOT</string>
+    <string name="krs_detected_desc">Course schedule has been detected</string>
+    <string name="ai_detect_krs_desc">AI will automatically detect your class hours</string>
+    <string name="confirm_schedule_title">Confirm Course Schedule</string>
+    <string name="krs_ai_detect_prefix">AI detected the following schedule from your KRS:</string>
+    <string name="confirm_button">CONFIRM</string>
+
+    <string name="daily_preferences_title">Daily Preferences</string>
+    <string name="personalize_training_subtitle">PERSONALIZE YOUR TRAINING</string>
+    <string name="wake_up_time_label">WAKE-UP TIME</string>
+    <string name="daily_food_budget_label">DAILY FOOD BUDGET</string>
+    <string name="medical_history_label">Medical History</string>
+    <string name="other_conditions_label">OTHER CONDITIONS</string>
+    <string name="medical_placeholder">Type your medical history here...</string>
+    <string name="finish_setup">FINISH SETUP</string>
+
+    <!-- Fuel Screen -->
+    <string name="fuel_recovery_title">FUEL &amp; RECOVERY</string>
+    <string name="budget_spent">BUDGET SPENT</string>
+    <string name="calories">CALORIES</string>
+    <string name="macronutrients">MACRONUTRIENTS</string>
+    <string name="todays_meals">TODAY\'S MEALS</string>
+    <string name="ai_suggestion">AI SUGGESTION</string>
+    <string name="ai_suggestion_desc">You have Rp 18k left. Grab a banana and 2 boiled eggs for dinner to hit your protein goal!</string>
+    <string name="macro_carbs">CARBS</string>
+    <string name="macro_protein">PROTEIN</string>
+    <string name="macro_fats">FATS</string>
+
+    <!-- Gear Screen -->
+    <string name="runners_gear">RUNNER\'S GEAR</string>
+    <string name="premium_store">PREMIUM AFFILIATE STORE</string>
+    <string name="curated_products_desc">Curated products for peak performance. SYNCRUN earns a small commission.</string>
+    <string name="affiliate_disclosure">AFFILIATE DISCLOSURE</string>
+    <string name="affiliate_desc">SYNCRUN EARNS A SMALL COMMISSION WHEN YOU PURCHASE THROUGH OUR LINKS. THIS HELPS US KEEP THE APP FREE AND IMPROVE YOUR TRAINING EXPERIENCE.</string>
+    <string name="shoe_reminder">RUNNING SHOE REMINDER</string>
+    <string name="shoe_reminder_desc">REPLACE YOUR SHOES EVERY 400-500 KM TO PREVENT INJURIES. TRACK YOUR MILEAGE IN THE APP!</string>
+    <string name="buy_on_shopee">BUY ON SHOPEE</string>
 </resources>

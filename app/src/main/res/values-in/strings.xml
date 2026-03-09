@@ -1,0 +1,119 @@
+<resources>
+    <string name="app_name">SYNCRUN</string>
+    <string name="calendar_month_year">FEBRUARI 2026</string>
+    <string name="day_sun">MIN</string>
+    <string name="day_mon">SEN</string>
+    <string name="day_tue">SEL</string>
+    <string name="day_wed">RAB</string>
+    <string name="day_thu">KAM</string>
+    <string name="day_fri">JUM</string>
+    <string name="day_sat">SAB</string>
+    <string name="no_schedule">Tidak ada jadwal untuk hari ini.</string>
+    <string name="add_event_title">Tambah Jadwal Kuliah</string>
+    <string name="course_name_label">Nama Mata Kuliah</string>
+    <string name="time_example_label">Waktu (Contoh: 09:00 - 11:00)</string>
+    <string name="save_button">SIMPAN</string>
+    <string name="cancel_button">BATAL</string>
+    <string name="time_prefix">Waktu: %1$s</string>
+    <string name="workout_type_class">KULIAH</string>
+    <string name="workout_type_rest">ISTIRAHAT</string>
+    <string name="workout_type_strength">KEKUATAN</string>
+    <string name="workout_type_interval">INTERVAL</string>
+    <string name="workout_type_long_run">LARI JARAK JAUH</string>
+    <string name="workout_type_easy_run">LARI SANTAI</string>
+    <string name="settings_title">Pengaturan</string>
+    <string name="dark_mode_label">Mode Gelap</string>
+    <string name="language_label">Bahasa</string>
+    <string name="select_language">Pilih Bahasa</string>
+
+    <!-- Home Screen -->
+    <string name="good_evening">SELAMAT MALAM</string>
+    <string name="current_kg">BERAT SAAT INI</string>
+    <string name="total_km">TOTAL KM</string>
+    <string name="target_kg">TARGET BERAT</string>
+    <string name="start_your_day">AWALI HARIMU</string>
+    <string name="daily_checkin_desc">Selesaikan check-in harian</string>
+    <string name="todays_session">SESI HARI INI</string>
+    <string name="rest_day">Hari Istirahat</string>
+    <string name="afternoon_clear_tip">Karena jadwal soremu kosong, ayo bergerak!</string>
+    <string name="this_week">MINGGU INI</string>
+    <string name="training_cycle">SIKLUS LATIHAN</string>
+    <string name="nutrition">NUTRISI</string>
+    <string name="log_run">CATAT LARI</string>
+    <string name="progress">PROGRES</string>
+    <string name="workouts">LATIHAN</string>
+    <string name="gear_store">GEAR STORE</string>
+    <string name="running_academy">AKADEMI LARI</string>
+    <string name="learn_and_grow">BELAJAR &amp; TUMBUH</string>
+
+    <!-- Login Screen -->
+    <string name="slogan">SINKRONISASI • LATIHAN • DOMINASI</string>
+    <string name="ai_powered_training">Latihan berbasis AI</string>
+    <string name="smart_scheduling">Penjadwalan pintar</string>
+    <string name="budget_optimized_nutrition">Nutrisi ramah kantong</string>
+    <string name="continue_with_gmail">LANJUTKAN DENGAN GMAIL</string>
+    <string name="skip_login_prototype">Lewati Login (Mode Prototipe)</string>
+
+    <!-- Setup Screens -->
+    <string name="setup_progress">PROGRES SETUP</string>
+    <string name="next_button">LANJUT</string>
+    <string name="finish_button">SELESAI</string>
+    <string name="name_label">NAMA</string>
+    <string name="current_weight_label">BERAT SAAT INI (KG)</string>
+    <string name="target_weight_label">TARGET BERAT (KG)</string>
+    <string name="goal_label">TARGET</string>
+    <string name="profile_goals_title">Profil &amp; Target</string>
+    <string name="set_targets_subtitle">TENTUKAN TARGET AMBISIUSMU</string>
+    <string name="goal_placeholder">Apa target utamamu?</string>
+
+    <string name="running_baseline_title">Baseline Lari</string>
+    <string name="ai_calibration_subtitle">KALIBRASI DASAR AI</string>
+    <string name="avg_easy_pace_label">PACE SANTAI RATA-RATA</string>
+    <string name="interval_pace_label">PACE INTERVAL</string>
+    <string name="long_run_pace_label">PACE LARI JARAK JAUH</string>
+    <string name="calculate_ai_paces">HITUNG PACE AI</string>
+    <string name="calibration_complete">KALIBRASI AI SELESAI</string>
+    <string name="calibration_complete_desc">Pace Anda telah berhasil dihitung.</string>
+    <string name="waiting_ai_calc">Menunggu perhitungan AI...</string>
+
+    <string name="class_schedule_ocr_title">OCR Jadwal Kuliah</string>
+    <string name="ai_vision_subtitle">TEKNOLOGI AI VISION</string>
+    <string name="krs_upload_success">KRS BERHASIL TERBACA</string>
+    <string name="upload_krs_screenshot">UNGGAH SCREENSHOT KRS</string>
+    <string name="krs_detected_desc">Jadwal kuliah telah terdeteksi</string>
+    <string name="ai_detect_krs_desc">AI akan otomatis mendeteksi jam kuliahmu</string>
+    <string name="confirm_schedule_title">Konfirmasi Jadwal Kuliah</string>
+    <string name="krs_ai_detect_prefix">AI mendeteksi jadwal berikut dari KRS Anda:</string>
+    <string name="confirm_button">KONFIRMASI</string>
+
+    <string name="daily_preferences_title">Preferensi Harian</string>
+    <string name="personalize_training_subtitle">PERSONALISASI LATIHANMU</string>
+    <string name="wake_up_time_label">WAKTU BANGUN</string>
+    <string name="daily_food_budget_label">ANGGARAN MAKAN HARIAN</string>
+    <string name="medical_history_label">Riwayat Medis</string>
+    <string name="other_conditions_label">KONDISI LAINNYA</string>
+    <string name="medical_placeholder">Ketik riwayat medismu di sini...</string>
+    <string name="finish_setup">SELESAIKAN SETUP</string>
+
+    <!-- Fuel Screen -->
+    <string name="fuel_recovery_title">NUTRISI &amp; PEMULIHAN</string>
+    <string name="budget_spent">ANGGARAN TERPAKAI</string>
+    <string name="calories">KALORI</string>
+    <string name="macronutrients">MAKRONUTRISI</string>
+    <string name="todays_meals">MAKANAN HARI INI</string>
+    <string name="ai_suggestion">SARAN AI</string>
+    <string name="ai_suggestion_desc">Sisa anggaranmu Rp 18rb. Makan pisang dan 2 telur rebus untuk makan malam agar protein terpenuhi!</string>
+    <string name="macro_carbs">KARBOHIDRAT</string>
+    <string name="macro_protein">PROTEIN</string>
+    <string name="macro_fats">LEMAK</string>
+
+    <!-- Gear Screen -->
+    <string name="runners_gear">ALAT LARI</string>
+    <string name="premium_store">TOKO AFILIASI PREMIUM</string>
+    <string name="curated_products_desc">Produk pilihan untuk performa maksimal. SYNCRUN mendapatkan komisi kecil.</string>
+    <string name="affiliate_disclosure">PENGUNGKAPAN AFILIASI</string>
+    <string name="affiliate_desc">SYNCRUN MENDAPATKAN KOMISI KECIL SAAT ANDA MEMBELI MELALUI LINK KAMI. INI MEMBANTU KAMI MENJAGA APLIKASI TETAP GRATIS DAN MENINGKATKAN PENGALAMAN LATIHAN ANDA.</string>
+    <string name="shoe_reminder">PENGINGAT SEPATU LARI</string>
+    <string name="shoe_reminder_desc">GANTI SEPATU SETIAP 400-500 KM UNTUK MENCEGAH CEDERA. PANTAU JARAK TEMPUHMU DI APLIKASI!</string>
+    <string name="buy_on_shopee">BELI DI SHOPEE</string>
+</resources>

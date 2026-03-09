@@ -19,27 +19,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.syncrun.R
 
 // --- WARNA & PRESET ---
-val DarkBackground = Color(0xFF1A1B22)
-val CardBackground = Color(0xFF24252E)
 val TextGradientColors = listOf(Color(0xFF81C784), Color(0xFF4DD0E1))
 val ButtonGradientColors = listOf(Color(0xFFFFFF00), Color(0xFF00E5FF))
 
 @Composable
 fun LoginScreen(
-    // Callback ini yang akan dipanggil di MainActivity untuk pindah layar
     onLoginSuccess: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
         Column(
@@ -65,7 +64,7 @@ fun LoginScreen(
             )
 
             Text(
-                text = "SYNCHRONIZE • TRAIN • DOMINATE",
+                text = stringResource(R.string.slogan),
                 color = Color.Gray,
                 fontSize = 12.sp,
                 letterSpacing = 1.sp
@@ -74,29 +73,26 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             // --- FEATURE CARDS (PLACEHOLDER) ---
-            // Tombol ini hanya visual (null action)
-            FeatureCard(Icons.Default.MonitorHeart, "AI-powered training", Color(0xFFFF5252))
+            FeatureCard(Icons.Default.MonitorHeart, stringResource(R.string.ai_powered_training), Color(0xFFFF5252))
             Spacer(modifier = Modifier.height(16.dp))
-            FeatureCard(Icons.Default.CalendarToday, "Smart scheduling", Color(0xFF40C4FF))
+            FeatureCard(Icons.Default.CalendarToday, stringResource(R.string.smart_scheduling), Color(0xFF40C4FF))
             Spacer(modifier = Modifier.height(16.dp))
-            FeatureCard(Icons.Default.Savings, "Budget-optimized nutrition", Color(0xFFFFD740))
+            FeatureCard(Icons.Default.Savings, stringResource(R.string.budget_optimized_nutrition), Color(0xFFFFD740))
 
             Spacer(modifier = Modifier.weight(1f))
 
             // --- TOMBOL UTAMA (BYPASS) ---
             GradientButton(
-                text = "CONTINUE WITH GMAIL",
+                text = stringResource(R.string.continue_with_gmail),
                 icon = Icons.Default.Email,
                 onClick = {
-                    // DI SINI LOGIKA BYPASS-NYA
-                    // Tidak perlu cek email/password, langsung panggil onLoginSuccess
                     onLoginSuccess()
                 }
             )
 
             // Opsional: Tombol bypass rahasia kecil di bawah untuk testing cepat
             TextButton(onClick = { onLoginSuccess() }) {
-                Text("Skip Login (Prototype Mode)", color = Color.Gray, fontSize = 10.sp)
+                Text(stringResource(R.string.skip_login_prototype), color = Color.Gray, fontSize = 10.sp)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -119,12 +115,12 @@ fun FeatureCard(icon: ImageVector, text: String, color: Color) {
             .fillMaxWidth()
             .height(70.dp)
             .border(1.dp, Color.DarkGray, RoundedCornerShape(12.dp))
-            .background(CardBackground.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp)
     ) {
         Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = text, color = Color.White, fontSize = 14.sp)
+        Text(text = text, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
     }
 }
 
@@ -136,7 +132,7 @@ fun GradientButton(text: String, icon: ImageVector, onClick: () -> Unit) {
             .height(56.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Brush.horizontalGradient(ButtonGradientColors))
-            .clickable { onClick() }, // Klik langsung trigger aksi
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

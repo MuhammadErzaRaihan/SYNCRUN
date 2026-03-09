@@ -19,20 +19,26 @@ class Setup2ViewModel : ViewModel() {
     val longRunPace = _longRunPace.asStateFlow()
 
     fun updatePace(newValue: String) {
-        // Batasi input hanya angka dan titik dua (misal: 06:30)
-        _easyPace.value = newValue
+        // Logika otomatis menambahkan :00 jika input hanya angka (single digit 1-9 atau >= 10)
+        val processedValue = if (newValue.isNotEmpty() && !newValue.contains(":") && newValue.all { it.isDigit() }) {
+            "$newValue:00"
+        } else {
+            newValue
+        }
+        
+        _easyPace.value = processedValue
         _isCalculated.value = false // Reset kalkulasi jika user mengganti angka
     }
 
     fun calculateAI() {
         val inputPace = _easyPace.value
 
-        // Cek apakah format input valid (mengandung ":" seperti 06:00)
+        // Cek apakah format input valid (mengandung ":" seperti 06:00 atau 6:00)
         if (inputPace.contains(":")) {
             try {
                 val parts = inputPace.split(":")
                 val minutes = parts[0].toInt()
-                val seconds = parts[1].toInt()
+                val seconds = if (parts.size > 1 && parts[1].isNotEmpty()) parts[1].toInt() else 0
 
                 // Ubah waktu ke total detik agar mudah dihitung
                 val totalSeconds = (minutes * 60) + seconds
@@ -58,7 +64,7 @@ class Setup2ViewModel : ViewModel() {
         }
     }
 
-    // Fungsi bantuan untuk mengubah 360 detik menjadi "06:00"
+    // Fungsi bantuan untuk mengubah detik menjadi format "MM:SS"
     private fun formatSecondsToTime(totalSecs: Int): String {
         val m = totalSecs / 60
         val s = totalSecs % 60

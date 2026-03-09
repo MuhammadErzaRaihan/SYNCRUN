@@ -37,7 +37,9 @@ private val TextGray = Color(0xFF9E9E9E)
 @Composable
 fun UserScreen(
     viewModel: UserViewModel = viewModel(),
-    onLogoutClick: () -> Unit = {}
+    onNavigateToRoute: (String) -> Unit = {},
+    onLogoutClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     val currentNavMenu by viewModel.currentNavMenu.collectAsState()
     val userName by viewModel.userName.collectAsState()
@@ -50,11 +52,14 @@ fun UserScreen(
         bottomBar = {
             SyncRunBottomBar(
                 currentRoute = currentNavMenu,
-                onItemClick = { viewModel.updateNavMenu(it) },
+                onItemClick = { menu ->
+                    viewModel.updateNavMenu(menu)
+                    onNavigateToRoute(menu.name.lowercase())
+                },
                 onFabClick = { /* Buka AI Coach */ }
             )
         },
-        containerColor = DarkBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -71,7 +76,7 @@ fun UserScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(CardBackground)
+                        .background(MaterialTheme.colorScheme.surface)
                         .border(2.dp, CyanAccent, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -80,7 +85,7 @@ fun UserScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(userName, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(userName, color = MaterialTheme.colorScheme.onBackground, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(userEmail, color = TextGray, fontSize = 14.sp)
 
@@ -95,7 +100,7 @@ fun UserScreen(
                 ) {
                     StatBox(modifier = Modifier.weight(1f), label = "RUNS", value = totalRuns, color = YellowAccent)
                     StatBox(modifier = Modifier.weight(1f), label = "DISTANCE", value = totalDistance, color = CyanAccent)
-                    StatBox(modifier = Modifier.weight(1f), label = "GOAL", value = activeGoal, color = Color.White)
+                    StatBox(modifier = Modifier.weight(1f), label = "GOAL", value = activeGoal, color = MaterialTheme.colorScheme.onBackground)
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }
@@ -106,16 +111,16 @@ fun UserScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(CardBackground)
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
                     MenuRow(icon = Icons.Default.Edit, title = "Edit Profile")
-                    HorizontalDivider(color = DarkBackground, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
 
                     MenuRow(icon = Icons.Default.Flag, title = "My Goals")
-                    HorizontalDivider(color = DarkBackground, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
 
-                    MenuRow(icon = Icons.Default.Settings, title = "Settings")
-                    HorizontalDivider(color = DarkBackground, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    MenuRow(icon = Icons.Default.Settings, title = "Settings", onClick = onSettingsClick)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
 
                     MenuRow(icon = Icons.Default.HelpOutline, title = "Help & Support")
                 }
@@ -155,7 +160,7 @@ fun StatBox(modifier: Modifier, label: String, value: String, color: Color) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(CardBackground)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -166,17 +171,17 @@ fun StatBox(modifier: Modifier, label: String, value: String, color: Color) {
 }
 
 @Composable
-fun MenuRow(icon: ImageVector, title: String) {
+fun MenuRow(icon: ImageVector, title: String, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Aksi klik menu */ }
+            .clickable { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = TextGray, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+        Text(title, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
         Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextGray)
     }
 }
@@ -188,6 +193,8 @@ fun MenuRow(icon: ImageVector, title: String) {
 fun UserScreenPreview() {
     UserScreen(
         viewModel = UserViewModel(),
-        onLogoutClick = {}
+        onNavigateToRoute = {},
+        onLogoutClick = {},
+        onSettingsClick = {}
     )
 }

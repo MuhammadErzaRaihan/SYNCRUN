@@ -1,6 +1,5 @@
 package com.example.syncrun.ui.theme.screen.setup
 
-
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,16 +12,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.syncrun.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Setup1Screen(
-    viewModel: Setup1ViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: Setup1ViewModel = viewModel(),
     onNextClick: () -> Unit
 ) {
     val name by viewModel.name.collectAsState()
@@ -34,38 +35,55 @@ fun Setup1Screen(
     val goals = listOf("5K Race", "10K Race", "Half-Marathon (21K)", "Full-Marathon (42K)", "Triathlon", "General Long-Run")
 
     Column(
-        modifier = Modifier.fillMaxSize().background(DarkBackground).padding(24.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(24.dp)
     ) {
         SetupProgressBar(currentStep = 1)
 
         Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            SetupHeaderSection("1/4", "Profile & Goals", "SET YOUR AMBITIOUS TARGETS", Icons.Default.MonitorHeart, CyanAccent)
+            SetupHeaderSection(
+                step = "1/4",
+                title = stringResource(R.string.profile_goals_title),
+                subtitle = stringResource(R.string.set_targets_subtitle),
+                icon = Icons.Default.MonitorHeart,
+                iconTint = CyanAccent
+            )
 
-            SetupTextField("NAME", name, "e.g., Your Name") { viewModel.updateName(it) }
+            SetupTextField(stringResource(R.string.name_label), name, "e.g., Your Name") { viewModel.updateName(it) }
             Spacer(modifier = Modifier.height(16.dp))
-            SetupTextField("CURRENT WEIGHT (KG)", currentWeight, "e.g., 77") { viewModel.updateCurrentWeight(it) }
+            SetupTextField(stringResource(R.string.current_weight_label), currentWeight, "e.g., 77") { viewModel.updateCurrentWeight(it) }
             Spacer(modifier = Modifier.height(16.dp))
-            SetupTextField("TARGET WEIGHT (KG)", targetWeight, "e.g., 70") { viewModel.updateTargetWeight(it) }
+            SetupTextField(stringResource(R.string.target_weight_label), targetWeight, "e.g., 70") { viewModel.updateTargetWeight(it) }
             Spacer(modifier = Modifier.height(16.dp))
 
             // Goal Dropdown
-            Text("GOAL", color = TextGray, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text(stringResource(R.string.goal_label), color = TextGray, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(8.dp))
             ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
                 OutlinedTextField(
                     value = selectedGoal, onValueChange = {}, readOnly = true,
-                    placeholder = { Text("What is your main target?", color = Color.Gray) },
+                    placeholder = { Text(stringResource(R.string.goal_placeholder), color = Color.Gray) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray, containerColor = FieldBackground, focusedTextColor = Color.White
+                        focusedBorderColor = CyanAccent,
+                        unfocusedBorderColor = Color.DarkGray,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, modifier = Modifier.background(FieldBackground)) {
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                ) {
                     goals.forEach { selectionOption ->
                         DropdownMenuItem(
-                            text = { Text(selectionOption, color = Color.White) },
+                            text = { Text(selectionOption, color = MaterialTheme.colorScheme.onSurface) },
                             onClick = { viewModel.updateGoal(selectionOption); expanded = false }
                         )
                     }
@@ -79,7 +97,7 @@ fun Setup1Screen(
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAFB42B))
         ) {
-            Text("NEXT", color = DarkBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(stringResource(R.string.next_button), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
@@ -87,9 +105,9 @@ fun Setup1Screen(
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showSystemUi = true)
 @Composable
-fun Setup1Preview () {
+fun Setup1Preview() {
     Setup1Screen(
-        viewModel =Setup1ViewModel(),
+        viewModel = Setup1ViewModel(),
         onNextClick = {}
     )
 }

@@ -1,6 +1,5 @@
 package com.example.syncrun.ui.theme.screen.setup
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,14 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.syncrun.R
 
 // --- TEMA & WARNA ---
-val DarkBackground = Color(0xFF16171D)
-val FieldBackground = Color(0xFF22232A)
 val CyanAccent = Color(0xFF00E5FF)
 val YellowAccent = Color(0xFFC6FF00)
 val TextGray = Color(0xFF9E9E9E)
@@ -31,12 +30,15 @@ fun SetupProgressBar(currentStep: Int, totalSteps: Int = 4) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("SETUP PROGRESS", color = TextGray, fontSize = 12.sp, letterSpacing = 1.sp)
+            Text(stringResource(R.string.setup_progress), color = TextGray, fontSize = 12.sp, letterSpacing = 1.sp)
             Text("$currentStep/$totalSteps", color = YellowAccent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Box(
-            modifier = Modifier.fillMaxWidth().height(4.dp).background(FieldBackground, RoundedCornerShape(2.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(2.dp))
         ) {
             Box(
                 modifier = Modifier
@@ -57,7 +59,7 @@ fun SetupHeaderSection(step: String, title: String, subtitle: String, icon: Imag
         }
         Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(48.dp))
         Spacer(modifier = Modifier.height(16.dp))
-        Text(title, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Text(title, color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(4.dp))
         Text(subtitle, color = TextGray, fontSize = 10.sp, letterSpacing = 1.sp)
     }
@@ -73,7 +75,7 @@ fun SetupTextField(label: String, value: String, placeholder: String, suffix: St
             value = value,
             onValueChange = onValueChange,
             placeholder = { Text(placeholder, color = Color.Gray, modifier = if(centerText) Modifier.fillMaxWidth() else Modifier, textAlign = if(centerText) TextAlign.Center else TextAlign.Start) },
-            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, textAlign = if(centerText) TextAlign.Center else TextAlign.Start, fontSize = if(centerText) 24.sp else 16.sp),
+            textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onSurface, textAlign = if(centerText) TextAlign.Center else TextAlign.Start, fontSize = if(centerText) 24.sp else 16.sp),
             trailingIcon = {
                 if (suffix.isNotEmpty()) Text(suffix, color = Color.Gray, modifier = Modifier.padding(end = 16.dp))
             },
@@ -81,7 +83,7 @@ fun SetupTextField(label: String, value: String, placeholder: String, suffix: St
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = CyanAccent,
                 unfocusedBorderColor = Color.DarkGray,
-                containerColor = FieldBackground,
+                containerColor = MaterialTheme.colorScheme.surface,
             ),
             shape = RoundedCornerShape(12.dp)
         )

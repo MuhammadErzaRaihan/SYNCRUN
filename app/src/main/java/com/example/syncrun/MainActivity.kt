@@ -22,6 +22,7 @@ import com.example.syncrun.ui.theme.screen.Home.GearScreen
 import com.example.syncrun.ui.theme.screen.calendar.CalendarScreen
 import com.example.syncrun.ui.theme.screen.fuel.FuelScreen
 import com.example.syncrun.ui.theme.screen.user.UserScreen
+import com.example.syncrun.ui.theme.screen.user.SettingScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,27 +101,61 @@ fun SyncRunApp() {
 
         // 7. HOME SCREEN
         composable("home") {
-            HomeScreen()
+            HomeScreen(
+                onNavigateToRoute = { route ->
+                    navController.navigate(route) {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
 
         // 8. CALENDAR SCREEN
         composable("calendar") {
-            CalendarScreen()
+            CalendarScreen(
+                onNavigateToRoute = { route ->
+                    navController.navigate(route) {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
 
         // 9. FUEL SCREEN
         composable("fuel") {
-            FuelScreen()
+            FuelScreen(
+                onNavigateToRoute = { route ->
+                    navController.navigate(route) {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
 
         // 10. USER / PROFILE SCREEN
         composable("profile") {
             UserScreen(
+                onNavigateToRoute = { route ->
+                    navController.navigate(route) {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 onLogoutClick = {
                     // Kembali ke login dan hapus seluruh backstack
                     navController.navigate("login") {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onSettingsClick = {
+                    navController.navigate("settings")
                 }
             )
         }
@@ -128,6 +163,13 @@ fun SyncRunApp() {
         // 11. GEAR STORE SCREEN
         composable("gear") {
             GearScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // 12. SETTINGS SCREEN
+        composable("settings") {
+            SettingScreen(
                 onBackClick = { navController.popBackStack() }
             )
         }
