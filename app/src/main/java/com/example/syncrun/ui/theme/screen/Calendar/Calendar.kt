@@ -1,6 +1,7 @@
 package com.example.syncrun.ui.theme.screen.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,20 +12,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.NightlightRound
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +57,9 @@ fun CalendarScreen(
         calendarDays = viewModel.calendarDays,
         onSelectDate = { viewModel.selectDate(it) },
         onToggleAddDialog = { viewModel.toggleAddEventDialog(it) },
-        onConfirmAddEvent = { title, time -> viewModel.addNewClass(title, time) },
+        onConfirmAddEvent = { title, time, code, mode, sess, loc, stat -> 
+            viewModel.addNewClass(title, time, code, mode, sess, loc, stat) 
+        },
         onNavigateToRoute = onNavigateToRoute,
         onUpdateNavMenu = { viewModel.updateNavMenu(it) }
     )
@@ -77,7 +74,7 @@ fun CalendarContent(
     calendarDays: List<Int>,
     onSelectDate: (Int) -> Unit,
     onToggleAddDialog: (Boolean) -> Unit,
-    onConfirmAddEvent: (String, String) -> Unit,
+    onConfirmAddEvent: (String, String, String, String, String, String, String) -> Unit,
     onNavigateToRoute: (String) -> Unit,
     onUpdateNavMenu: (NavMenu) -> Unit
 ) {
@@ -86,7 +83,7 @@ fun CalendarContent(
     if (showAddDialog) {
         AddEventDialog(
             onDismiss = { onToggleAddDialog(false) },
-            onConfirm = { title, time -> onConfirmAddEvent(title, time) }
+            onConfirm = onConfirmAddEvent
         )
     }
 
@@ -173,7 +170,6 @@ fun CalendarContent(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                // Feb 2026 mulai hari Minggu (Index 0)
                 items(calendarDays) { date ->
                     val hasWorkout = schedule.containsKey(date)
                     val workoutType = schedule[date]?.firstOrNull()?.type ?: ""
@@ -205,7 +201,11 @@ fun CalendarContent(
                     }
                 } else {
                     items(todaysWorkout) { workout ->
-                        WorkoutDetailCard(workout)
+                        if (workout.type == "CLASS") {
+                            ClassDetailCard(workout)
+                        } else {
+                            WorkoutDetailCard(workout)
+                        }
                     }
                 }
                 item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -215,43 +215,185 @@ fun CalendarContent(
 }
 
 @Composable
-fun AddEventDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
+fun ClassDetailCard(workout: WorkoutSession) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(CardBackground)
+            .padding(20.dp)
+    ) {
+        // Baris Atas: Kode Kelas & Badge Status
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = workout.classCode ?: "CLASS",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+            
+            if (!workout.status.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text(workout.status, color = Color.White, fontSize = 10.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Nama Mata Kuliah
+        Text(
+            text = workout.title,
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Detail dengan Ikon
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (!workout.deliveryMode.isNullOrEmpty()) {
+                DetailRow(Icons.Default.Info, workout.deliveryMode)
+            }
+            if (!workout.session.isNullOrEmpty()) {
+                DetailRow(Icons.Default.Whatshot, workout.session)
+            }
+            DetailRow(Icons.Default.Schedule, workout.duration ?: "-")
+            if (!workout.location.isNullOrEmpty()) {
+                DetailRow(Icons.Default.LocationOn, workout.location)
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailRow(icon: ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = TextGray,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text, color = TextGray, fontSize = 13.sp)
+    }
+}
+
+@Composable
+fun AddEventDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, String, String, String, String) -> Unit) {
     var title by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
+    var code by remember { mutableStateOf("") }
+    var mode by remember { mutableStateOf("") }
+    var sess by remember { mutableStateOf("") }
+    var loc by remember { mutableStateOf("") }
+    var stat by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = CardBackground,
         title = { Text(stringResource(R.string.add_event_title), color = Color.White, fontWeight = FontWeight.Bold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text(stringResource(R.string.course_name_label)) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = CyanAccent,
-                        unfocusedBorderColor = Color.DarkGray
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                item {
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text(stringResource(R.string.course_name_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                            focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                        )
                     )
-                )
-                OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it },
-                    label = { Text(stringResource(R.string.time_example_label)) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = CyanAccent,
-                        unfocusedBorderColor = Color.DarkGray
+                }
+                item {
+                    OutlinedTextField(
+                        value = time,
+                        onValueChange = { time = it },
+                        label = { Text(stringResource(R.string.time_example_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                            focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                        )
                     )
-                )
+                }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = code,
+                            onValueChange = { code = it },
+                            label = { Text("Class Code") },
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                                focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                            )
+                        )
+                        OutlinedTextField(
+                            value = sess,
+                            onValueChange = { sess = it },
+                            label = { Text("Session") },
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                                focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                            )
+                        )
+                    }
+                }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = mode,
+                            onValueChange = { mode = it },
+                            label = { Text("Mode (F2F/GSLC)") },
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                                focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                            )
+                        )
+                        OutlinedTextField(
+                            value = stat,
+                            onValueChange = { stat = it },
+                            label = { Text("Status") },
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                                focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                            )
+                        )
+                    }
+                }
+                item {
+                    OutlinedTextField(
+                        value = loc,
+                        onValueChange = { loc = it },
+                        label = { Text("Location") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White, unfocusedTextColor = Color.White,
+                            focusedBorderColor = CyanAccent, unfocusedBorderColor = Color.DarkGray
+                        )
+                    )
+                }
             }
         },
         confirmButton = {
             Button(
-                onClick = { if (title.isNotEmpty()) onConfirm(title, time) },
+                onClick = { if (title.isNotEmpty()) onConfirm(title, time, code, mode, sess, loc, stat) },
                 colors = ButtonDefaults.buttonColors(containerColor = CyanAccent)
             ) {
                 Text(stringResource(R.string.save_button), color = Color.Black, fontWeight = FontWeight.Bold)
@@ -307,7 +449,6 @@ fun CalendarDayItem(
 @Composable
 fun WorkoutDetailCard(workout: WorkoutSession) {
     val (icon, iconTint, typeLabel) = when (workout.type) {
-        "CLASS" -> Triple(Icons.Default.School, Color(0xFF4CAF50), stringResource(R.string.workout_type_class))
         "REST" -> Triple(Icons.Default.NightlightRound, Color(0xFFB388FF), stringResource(R.string.workout_type_rest))
         "STRENGTH" -> Triple(Icons.Default.FitnessCenter, Color(0xFFFF5252), stringResource(R.string.workout_type_strength))
         "INTERVAL" -> Triple(Icons.Default.Timer, CyanAccent, stringResource(R.string.workout_type_interval))
@@ -335,20 +476,7 @@ fun WorkoutDetailCard(workout: WorkoutSession) {
         Spacer(modifier = Modifier.height(12.dp))
         Text(workout.title, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        val durationText = if (workout.type == "CLASS") {
-            stringResource(R.string.time_prefix, workout.duration ?: "")
-        } else {
-            workout.duration ?: ""
-        }
-        Text(durationText, color = TextGray, fontSize = 14.sp)
-    }
-}
-
-@Composable
-fun WorkoutMetric(label: String, value: String) {
-    Column {
-        Text(label, color = TextGray, fontSize = 10.sp)
-        Text(value, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(workout.duration ?: "", color = TextGray, fontSize = 14.sp)
     }
 }
 
@@ -357,11 +485,17 @@ fun WorkoutMetric(label: String, value: String) {
 fun CalendarScreenPreview() {
     val sampleSchedule = mapOf(
         15 to listOf(
-            WorkoutSession(type = "CLASS", title = "Pemrograman Mobile", duration = "08:00 - 10:30"),
+            WorkoutSession(
+                type = "CLASS", 
+                title = "Business Research and Trend Forecasting", 
+                duration = "11:20 - 13:00 GMT+7",
+                classCode = "LE51 - LEC",
+                deliveryMode = "F2F",
+                session = "Session 1",
+                location = "Alam Sutera Main Campus - A1103",
+                status = "Onsite Class"
+            ),
             WorkoutSession(type = "EASY RUN", title = "Morning Run", duration = "30 min")
-        ),
-        16 to listOf(
-            WorkoutSession(type = "REST", title = "Rest Day", duration = "-")
         )
     )
 
@@ -374,7 +508,7 @@ fun CalendarScreenPreview() {
             calendarDays = (1..31).toList(),
             onSelectDate = {},
             onToggleAddDialog = {},
-            onConfirmAddEvent = { _, _ -> },
+            onConfirmAddEvent = { _, _, _, _, _, _, _ -> },
             onNavigateToRoute = {},
             onUpdateNavMenu = {}
         )

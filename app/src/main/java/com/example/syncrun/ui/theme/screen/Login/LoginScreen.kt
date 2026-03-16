@@ -91,9 +91,9 @@ fun LoginScreen(
             )
 
             // Opsional: Tombol bypass rahasia kecil di bawah untuk testing cepat
-            TextButton(onClick = { onLoginSuccess() }) {
-                Text(stringResource(R.string.skip_login_prototype), color = Color.Gray, fontSize = 10.sp)
-            }
+//            TextButton(onClick = { onLoginSuccess() }) {
+//                Text(stringResource(R.string.skip_login_prototype), color = Color.Gray, fontSize = 10.sp)
+//            }
 
             Spacer(modifier = Modifier.height(24.dp))
         }

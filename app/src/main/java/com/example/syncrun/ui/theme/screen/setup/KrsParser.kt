@@ -52,8 +52,8 @@ object KrsParser {
                 continue
             }
 
-            // 2. Deteksi Jam (11:20 - 13:00)
-            val timeMatch = Regex("""(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})""").find(line)
+            // 2. Deteksi Jam (11:20 - 13:00 GMT+7)
+            val timeMatch = Regex("""(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})(.*)""").find(line)
             val currentDate = lastDetectedDay
             
             if (timeMatch != null && currentDate != null) {
@@ -61,32 +61,55 @@ object KrsParser {
                 
                 // Cari Header Kelas ke atas (misal "LE51 - LEC")
                 var headerIndex = -1
+                var classCode = ""
                 for (j in i - 1 downTo maxOf(0, i - 15)) {
                     val l = lines[j]
                     if (l.contains(" - ") && l.any { it.isUpperCase() } && l.length < 30) {
                         headerIndex = j
+                        classCode = l
                         break
                     }
                 }
 
                 if (headerIndex != -1) {
-                    val subjectLines = mutableListOf<String>()
+                    var subject = ""
+                    var deliveryMode = ""
+                    var sessionLabel = ""
+                    var location = ""
+                    var status = ""
+
+                    // Scan baris di antara Header dan Time
                     for (k in headerIndex + 1 until i) {
                         val original = lines[k]
                         val l = original.lowercase()
                         
-                        // Filter baris info teknis yang bukan nama mata kuliah
-                        val isTechnical = (l.contains("f2f") || l.contains("session") || l.contains("onsite") || l.contains("online") || l.contains("class")) && l.length < 20
-                        val isLocation = l.contains("campus") || l.contains("alam sutera") || l.contains("main")
-                        
-                        if (isTechnical || isLocation || original.length < 2) continue
-                        
-                        subjectLines.add(original)
+                        when {
+                            l.contains("f2f") || l.contains("gslc") || l.contains("online") -> deliveryMode = original
+                            l.contains("session") -> sessionLabel = original
+                            l.contains("campus") || l.contains("alam sutera") || l.contains("main") -> location = original
+                            l.contains("onsite class") || l.contains("online class") -> status = original
+                            original.length > 5 && subject.isEmpty() -> subject = original
+                        }
                     }
-                    val subject = subjectLines.joinToString(" ").trim()
+                    
+                    // Kadang location ada di bawah time
+                    if (location.isEmpty() && i + 1 < lines.size) {
+                        val nextLine = lines[i+1]
+                        if (nextLine.lowercase().contains("campus")) location = nextLine
+                    }
 
                     if (subject.isNotEmpty()) {
-                        val session = WorkoutSession(type = "CLASS", title = subject, duration = timeStr, isCompleted = false)
+                        val session = WorkoutSession(
+                            type = "CLASS", 
+                            title = subject, 
+                            duration = timeStr,
+                            classCode = classCode,
+                            deliveryMode = deliveryMode,
+                            session = sessionLabel,
+                            location = location,
+                            status = status,
+                            isCompleted = false
+                        )
                         val list = detectedSchedule.getOrPut(currentDate) { mutableListOf() }
                         if (list.none { it.title == subject && it.duration == timeStr }) {
                             list.add(session)

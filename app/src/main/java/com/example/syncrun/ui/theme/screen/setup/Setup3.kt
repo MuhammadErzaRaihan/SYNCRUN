@@ -12,10 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +22,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.R
+import com.example.syncrun.ui.theme.screen.calendar.WorkoutSession
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -58,12 +57,12 @@ fun Setup3Screen(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissDialog() },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = Color(0xFF1A1B21),
             title = {
-                Text(stringResource(R.string.confirm_schedule_title), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.confirm_schedule_title), color = Color.White, fontWeight = FontWeight.Bold)
             },
             text = {
-                Column(modifier = Modifier.fillMaxWidth().heightIn(max = 350.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)) {
                     Text(stringResource(R.string.krs_ai_detect_prefix), color = TextGray, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(16.dp))
                     
@@ -73,31 +72,16 @@ fun Setup3Screen(
                             date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
                         }
                     
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         groupedByDay.forEach { (dayName, dailyEntries) ->
                             item {
-                                Text(dayName, color = CyanAccent, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color.DarkGray)
+                                Text(dayName.uppercase(), color = CyanAccent, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, letterSpacing = 1.sp)
+                                HorizontalDivider(modifier = Modifier.padding(top = 4.dp), color = Color.DarkGray)
                             }
                             
                             dailyEntries.forEach { entry ->
                                 items(entry.value) { session ->
-                                    Row(
-                                        modifier = Modifier.padding(vertical = 4.dp),
-                                        verticalAlignment = Alignment.Top
-                                    ) {
-                                        Icon(
-                                            Icons.Default.School, 
-                                            contentDescription = null, 
-                                            tint = YellowAccent, 
-                                            modifier = Modifier.size(18.dp).padding(top = 2.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Column {
-                                            Text(session.title, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                                            Text(session.duration ?: "", color = TextGray, fontSize = 11.sp)
-                                        }
-                                    }
+                                    DetectionDetailItem(session)
                                 }
                             }
                         }
@@ -209,6 +193,54 @@ fun Setup3Screen(
                 Text(stringResource(R.string.next_button), color = Color.Black, fontWeight = FontWeight.Bold)
             }
         }
+    }
+}
+
+@Composable
+fun DetectionDetailItem(session: WorkoutSession) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                session.classCode ?: "CLASS",
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (!session.status.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "[${session.status}]",
+                    color = YellowAccent,
+                    fontSize = 10.sp
+                )
+            }
+        }
+        Text(
+            session.title,
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(vertical = 2.dp)
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            DetectionSmallInfo(Icons.Default.Schedule, session.duration ?: "")
+            if (!session.deliveryMode.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.width(12.dp))
+                DetectionSmallInfo(Icons.Default.Info, session.deliveryMode)
+            }
+        }
+        if (!session.location.isNullOrEmpty()) {
+            DetectionSmallInfo(Icons.Default.LocationOn, session.location, Modifier.padding(top = 2.dp))
+        }
+    }
+}
+
+@Composable
+fun DetectionSmallInfo(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+        Icon(icon, null, tint = TextGray, modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text, color = TextGray, fontSize = 11.sp)
     }
 }
 

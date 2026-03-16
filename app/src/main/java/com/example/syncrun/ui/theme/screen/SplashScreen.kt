@@ -26,13 +26,12 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.syncrun.R
 import kotlinx.coroutines.delay
 
+// Perubahan pada D:/SYNCRUN/app/src/main/java/com/example/syncrun/ui/theme/screen/SplashScreen.kt
+
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
+    // Memastikan asset dipanggil dengan tepat
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("animasi loading.json"))
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        iterations = LottieConstants.IterateForever
-    )
 
     LaunchedEffect(Unit) {
         delay(5000)
@@ -48,21 +47,17 @@ fun SplashScreen(onTimeout: () -> Unit) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(id = R.drawable.logo_1),
-                contentDescription = "Logo 1",
-                modifier = Modifier.size(120.dp)
+                contentDescription = "Logo Aplikasi",
+                modifier = Modifier.size(150.dp) // Ukuran logo disesuaikan
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Menggunakan versi LottieAnimation yang lebih sederhana untuk auto-play
             LottieAnimation(
                 composition = composition,
-                progress = { progress },
+                iterations = LottieConstants.IterateForever,
                 modifier = Modifier.size(100.dp)
             )
         }
     }
 }
-
-//@Preview(showSystemUi = true)
-//@Composable
-//fun SplashScreenPreview (){
-//    SplashScreen()
-//}
