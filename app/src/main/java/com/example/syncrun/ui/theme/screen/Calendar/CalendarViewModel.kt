@@ -5,8 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.syncrun.data.ScheduleRepository
 import com.example.syncrun.ui.theme.component.NavMenu
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.YearMonth
 
 // Data class untuk sesi latihan dan jadwal kelas
 data class WorkoutSession(
@@ -29,10 +35,32 @@ class CalendarViewModel : ViewModel() {
     private val _currentNavMenu = MutableStateFlow(NavMenu.CALENDAR)
     val currentNavMenu = _currentNavMenu.asStateFlow()
 
-    private val _selectedDate = MutableStateFlow(15)
+    private val _currentMonth = MutableStateFlow(YearMonth.now())
+    val currentMonth = _currentMonth.asStateFlow()
+
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate = _selectedDate.asStateFlow()
 
-    val calendarDays = (1..31).toList()
+    // Generate list of days for the current month, including leading empty days
+    val calendarDays: StateFlow<List<Int?>> = _currentMonth.combine(_selectedDate) { month, _ ->
+        val firstDayOfMonth = month.atDay(1)
+        val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value % 7 // 0 = Sunday, 1 = Monday, ...
+        
+        val daysInMonth = month.lengthOfMonth()
+        val days = mutableListOf<Int?>()
+        
+        // Add leading empty days
+        for (i in 0 until firstDayOfWeek) {
+            days.add(null)
+        }
+        
+        // Add actual days
+        for (i in 1..daysInMonth) {
+            days.add(i)
+        }
+        
+        days
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _schedule = MutableStateFlow<Map<Int, List<WorkoutSession>>>(emptyMap())
     val schedule = _schedule.asStateFlow()
@@ -53,8 +81,16 @@ class CalendarViewModel : ViewModel() {
         _currentNavMenu.value = menu
     }
 
-    fun selectDate(date: Int) {
-        _selectedDate.value = date
+    fun selectDate(day: Int) {
+        _selectedDate.value = _currentMonth.value.atDay(day)
+    }
+
+    fun nextMonth() {
+        _currentMonth.value = _currentMonth.value.plusMonths(1)
+    }
+
+    fun previousMonth() {
+        _currentMonth.value = _currentMonth.value.minusMonths(1)
     }
 
     fun toggleAddEventDialog(show: Boolean) {
@@ -81,7 +117,9 @@ class CalendarViewModel : ViewModel() {
             status = if (status.isNotEmpty()) status else null,
             isCompleted = false
         )
-        ScheduleRepository.addSingleEvent(_selectedDate.value, newSession)
+        // Note: ScheduleRepository currently uses day Int as key. 
+        // We should ideally use full date, but for now we use the selected date's day.
+        ScheduleRepository.addSingleEvent(_selectedDate.value.dayOfMonth, newSession)
         _showAddEventDialog.value = false
     }
 }

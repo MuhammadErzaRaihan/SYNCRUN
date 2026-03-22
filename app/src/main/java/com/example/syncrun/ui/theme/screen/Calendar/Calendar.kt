@@ -31,6 +31,10 @@ import com.example.syncrun.R
 import com.example.syncrun.ui.theme.SYNCRUNTheme
 import com.example.syncrun.ui.theme.component.NavMenu
 import com.example.syncrun.ui.theme.component.SyncRunBottomBar
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 // --- TEMA WARNA LOKAL ---
 private val DarkBackground = Color(0xFF16171D)
@@ -46,16 +50,21 @@ fun CalendarScreen(
 ) {
     val currentNavMenu by viewModel.currentNavMenu.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
+    val currentMonth by viewModel.currentMonth.collectAsState()
     val schedule by viewModel.schedule.collectAsState()
     val showAddDialog by viewModel.showAddEventDialog.collectAsState()
+    val calendarDays by viewModel.calendarDays.collectAsState()
 
     CalendarContent(
         currentNavMenu = currentNavMenu,
         selectedDate = selectedDate,
+        currentMonth = currentMonth,
         schedule = schedule,
         showAddDialog = showAddDialog,
-        calendarDays = viewModel.calendarDays,
+        calendarDays = calendarDays,
         onSelectDate = { viewModel.selectDate(it) },
+        onNextMonth = { viewModel.nextMonth() },
+        onPreviousMonth = { viewModel.previousMonth() },
         onToggleAddDialog = { viewModel.toggleAddEventDialog(it) },
         onConfirmAddEvent = { title, time, code, mode, sess, loc, stat -> 
             viewModel.addNewClass(title, time, code, mode, sess, loc, stat) 
@@ -68,17 +77,21 @@ fun CalendarScreen(
 @Composable
 fun CalendarContent(
     currentNavMenu: NavMenu,
-    selectedDate: Int,
+    selectedDate: LocalDate,
+    currentMonth: YearMonth,
     schedule: Map<Int, List<WorkoutSession>>,
     showAddDialog: Boolean,
-    calendarDays: List<Int>,
+    calendarDays: List<Int?>,
     onSelectDate: (Int) -> Unit,
+    onNextMonth: () -> Unit,
+    onPreviousMonth: () -> Unit,
     onToggleAddDialog: (Boolean) -> Unit,
     onConfirmAddEvent: (String, String, String, String, String, String, String) -> Unit,
     onNavigateToRoute: (String) -> Unit,
     onUpdateNavMenu: (NavMenu) -> Unit
 ) {
-    val todaysWorkout = schedule[selectedDate] ?: emptyList()
+    // Repository currently uses Day Int. Ideally it should be LocalDate or similar.
+    val todaysWorkout = schedule[selectedDate.dayOfMonth] ?: emptyList()
 
     if (showAddDialog) {
         AddEventDialog(
@@ -125,15 +138,22 @@ fun CalendarContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Month", tint = Color.White)
+                IconButton(onClick = onPreviousMonth) {
+                    Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Month", tint = Color.White)
+                }
+                
+                val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
                 Text(
-                    text = stringResource(R.string.calendar_month_year),
+                    text = currentMonth.format(monthYearFormatter),
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
-                Icon(Icons.Default.ChevronRight, contentDescription = "Next Month", tint = Color.White)
+                
+                IconButton(onClick = onNextMonth) {
+                    Icon(Icons.Default.ChevronRight, contentDescription = "Next Month", tint = Color.White)
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -171,16 +191,20 @@ fun CalendarContent(
                     .padding(horizontal = 16.dp)
             ) {
                 items(calendarDays) { date ->
-                    val hasWorkout = schedule.containsKey(date)
-                    val workoutType = schedule[date]?.firstOrNull()?.type ?: ""
+                    if (date != null) {
+                        val hasWorkout = schedule.containsKey(date)
+                        val workoutType = schedule[date]?.firstOrNull()?.type ?: ""
 
-                    CalendarDayItem(
-                        date = date,
-                        isSelected = selectedDate == date,
-                        hasWorkout = hasWorkout,
-                        workoutType = workoutType,
-                        onClick = { onSelectDate(date) }
-                    )
+                        CalendarDayItem(
+                            date = date,
+                            isSelected = selectedDate.dayOfMonth == date && selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year,
+                            hasWorkout = hasWorkout,
+                            workoutType = workoutType,
+                            onClick = { onSelectDate(date) }
+                        )
+                    } else {
+                        Box(modifier = Modifier.size(44.dp).padding(4.dp))
+                    }
                 }
             }
 
@@ -502,11 +526,14 @@ fun CalendarScreenPreview() {
     SYNCRUNTheme {
         CalendarContent(
             currentNavMenu = NavMenu.CALENDAR,
-            selectedDate = 15,
+            selectedDate = LocalDate.now(),
+            currentMonth = YearMonth.now(),
             schedule = sampleSchedule,
             showAddDialog = false,
             calendarDays = (1..31).toList(),
             onSelectDate = {},
+            onNextMonth = {},
+            onPreviousMonth = {},
             onToggleAddDialog = {},
             onConfirmAddEvent = { _, _, _, _, _, _, _ -> },
             onNavigateToRoute = {},
