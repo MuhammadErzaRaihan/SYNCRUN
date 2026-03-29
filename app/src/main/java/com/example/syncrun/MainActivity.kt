@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -104,7 +103,7 @@ fun SyncRunApp() {
 
             composable("login") {
                 LoginScreen(onLoginSuccess = {
-                    navController.navigate("setup1") {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                 })

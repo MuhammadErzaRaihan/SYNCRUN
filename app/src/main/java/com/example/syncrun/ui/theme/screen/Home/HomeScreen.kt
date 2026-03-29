@@ -11,7 +11,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.R
+import com.example.syncrun.ui.theme.SYNCRUNTheme
 
 // --- TEMA WARNA LOKAL ---
 private val YellowAccent = Color(0xFFC6FF00)
@@ -42,7 +45,21 @@ fun HomeScreen(
     val totalKm by viewModel.totalKm.collectAsState()
     val targetWeight by viewModel.targetWeight.collectAsState()
 
-    // Menggunakan Box sebagai container utama, bukan Scaffold redundan
+    HomeContent(
+        currentWeight = currentWeight,
+        totalKm = totalKm,
+        targetWeight = targetWeight,
+        onNavigateToRoute = onNavigateToRoute
+    )
+}
+
+@Composable
+fun HomeContent(
+    currentWeight: String,
+    totalKm: String,
+    targetWeight: String,
+    onNavigateToRoute: (String) -> Unit = {}
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -66,10 +83,9 @@ fun HomeScreen(
             item { CheckInBanner() }
             item { TodaySessionCard() }
             item { ThisWeekSection() }
-            item { QuickActionsSection() }
+            item { QuickActionsSection(onNavigateToRoute) }
             item { RunningAcademySection() }
             
-            // Spacer bawah agar konten tidak tertutup oleh BottomBar global
             item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
@@ -84,7 +100,7 @@ fun HomeHeader() {
     ) {
         Column {
             Text(stringResource(R.string.good_evening), color = TextGray, fontSize = 10.sp, letterSpacing = 1.sp)
-            Text("e", color = YellowAccent, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text("ez", color = YellowAccent, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
         Box(
             modifier = Modifier
@@ -219,7 +235,7 @@ fun ScheduleItem(day: String, title: String, emoji: String) {
 }
 
 @Composable
-fun QuickActionsSection() {
+fun QuickActionsSection(onNavigateToRoute: (String) -> Unit = {}) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             QuickActionButton(modifier = Modifier.weight(1f), icon = Icons.Default.Restaurant, label = stringResource(R.string.nutrition))
@@ -228,18 +244,28 @@ fun QuickActionsSection() {
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             QuickActionButton(modifier = Modifier.weight(1f), icon = Icons.Default.PlayCircleOutline, label = stringResource(R.string.workouts))
-            QuickActionButton(modifier = Modifier.weight(1f), icon = Icons.Default.ShoppingBag, label = stringResource(R.string.gear_store))
+            QuickActionButton(
+                modifier = Modifier.weight(1f), 
+                icon = Icons.Default.ShoppingBag, 
+                label = stringResource(R.string.gear_store),
+                onClick = { onNavigateToRoute("gear") }
+            )
         }
     }
 }
 
 @Composable
-fun QuickActionButton(modifier: Modifier, icon: ImageVector, label: String) {
+fun QuickActionButton(
+    modifier: Modifier, 
+    icon: ImageVector, 
+    label: String,
+    onClick: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable { }
+            .clickable { onClick() }
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -265,38 +291,36 @@ fun RunningAcademySection() {
         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             item { AcademyCard("5 Tips for Your First Half-Marathon", "Master the fundamentals...", Color(0xFFFFB74D)) }
             item { AcademyCard("Choosing the Right Shoes", "Find the perfect fit...", Color(0xFF81C784)) }
-            item { AcademyCard("Pre-Run Nutrition", "Fuel your body right...", Color(0xFF64B5F6)) }
         }
     }
 }
 
 @Composable
-fun AcademyCard(title: String, desc: String, imageColor: Color) {
+fun AcademyCard(title: String, subtitle: String, color: Color) {
     Column(
         modifier = Modifier
-            .width(220.dp)
+            .width(200.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surface)
             .clickable { }
     ) {
-        Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(imageColor)) {
-            Icon(
-                Icons.Default.BookmarkBorder, contentDescription = null, tint = Color.White,
-                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(24.dp).background(Color.Black.copy(alpha=0.3f), CircleShape).padding(4.dp)
-            )
-        }
+        Box(modifier = Modifier.fillMaxWidth().height(100.dp).background(color))
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("5 MIN READ", color = YellowAccent, fontSize = 9.sp, modifier = Modifier.border(1.dp, YellowAccent, RoundedCornerShape(4.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
-            Spacer(modifier = Modifier.height(8.dp))
             Text(title, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(desc, color = TextGray, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(subtitle, color = TextGray, fontSize = 10.sp)
         }
     }
 }
 
-@Preview(showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(viewModel = HomeViewModel())
+    SYNCRUNTheme {
+        HomeContent(
+            currentWeight = "75",
+            totalKm = "120.5",
+            targetWeight = "70"
+        )
+    }
 }

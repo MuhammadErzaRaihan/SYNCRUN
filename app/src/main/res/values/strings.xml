@@ -111,11 +111,16 @@
 
     <!-- Gear Screen -->
     <string name="runners_gear">RUNNER\'S GEAR</string>
-    <string name="premium_store">PREMIUM AFFILIATE STORE</string>
-    <string name="curated_products_desc">Curated products for peak performance. SYNCRUN earns a small commission.</string>
+    <string name="curated_desc">CURATED BY PROFESSIONALS &amp; COMMUNITY</string>
+    <string name="verified_label">VERIFIED</string>
+    <string name="gear_of_the_month">GEAR OF THE MONTH</string>
+    <string name="ratings_count">(%1$s Ratings) • %2$s Sold</string>
+    <string name="buy_now">BUY NOW</string>
+    <string name="discover_more">DISCOVER MORE</string>
+    <string name="sold_count">| %1$s Sold</string>
+    <string name="tokopedia_label">TOKOPEDIA</string>
     <string name="affiliate_disclosure">AFFILIATE DISCLOSURE</string>
     <string name="affiliate_desc">SYNCRUN EARNS A SMALL COMMISSION WHEN YOU PURCHASE THROUGH OUR LINKS. THIS HELPS US KEEP THE APP FREE AND IMPROVE YOUR TRAINING EXPERIENCE.</string>
     <string name="shoe_reminder">RUNNING SHOE REMINDER</string>
     <string name="shoe_reminder_desc">REPLACE YOUR SHOES EVERY 400-500 KM TO PREVENT INJURIES. TRACK YOUR MILEAGE IN THE APP!</string>
-    <string name="buy_on_shopee">BUY ON SHOPEE</string>
 </resources>

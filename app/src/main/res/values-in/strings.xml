@@ -111,11 +111,16 @@
 
     <!-- Gear Screen -->
     <string name="runners_gear">ALAT LARI</string>
-    <string name="premium_store">TOKO AFILIASI PREMIUM</string>
-    <string name="curated_products_desc">Produk pilihan untuk performa maksimal. SYNCRUN mendapatkan komisi kecil.</string>
+    <string name="curated_desc">DIKURASI OLEH PROFESIONAL &amp; KOMUNITAS</string>
+    <string name="verified_label">TERVERIFIKASI</string>
+    <string name="gear_of_the_month">PERALATAN BULAN INI</string>
+    <string name="ratings_count">(%1$s Rating) • %2$s Terjual</string>
+    <string name="buy_now">BELI SEKARANG</string>
+    <string name="discover_more">TEMUKAN LEBIH BANYAK</string>
+    <string name="sold_count">| %1$s Terjual</string>
+    <string name="tokopedia_label">TOKOPEDIA</string>
     <string name="affiliate_disclosure">PENGUNGKAPAN AFILIASI</string>
     <string name="affiliate_desc">SYNCRUN MENDAPATKAN KOMISI KECIL SAAT ANDA MEMBELI MELALUI LINK KAMI. INI MEMBANTU KAMI MENJAGA APLIKASI TETAP GRATIS DAN MENINGKATKAN PENGALAMAN LATIHAN ANDA.</string>
     <string name="shoe_reminder">PENGINGAT SEPATU LARI</string>
     <string name="shoe_reminder_desc">GANTI SEPATU SETIAP 400-500 KM UNTUK MENCEGAH CEDERA. PANTAU JARAK TEMPUHMU DI APLIKASI!</string>
-    <string name="buy_on_shopee">BELI DI SHOPEE</string>
 </resources>

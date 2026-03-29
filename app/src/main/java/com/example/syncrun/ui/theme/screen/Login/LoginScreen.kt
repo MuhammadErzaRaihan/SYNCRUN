@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -30,8 +28,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.R
 import com.example.syncrun.ui.theme.SYNCRUNTheme
+import com.example.syncrun.ui.theme.screen.Login.LoginState
+import com.example.syncrun.ui.theme.screen.Login.LoginViewModel
 
 // --- WARNA & PRESET ---
 val TextGradientColors = listOf(Color(0xFF81C784), Color(0xFF4DD0E1))
@@ -40,11 +41,21 @@ private val CyanAccent = Color(0xFF00E5FF)
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
     onLoginSuccess: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    
+    val loginState by viewModel.loginState.collectAsState()
+
+    LaunchedEffect(loginState) {
+        if (loginState is LoginState.Success) {
+            onLoginSuccess()
+            viewModel.resetState()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -81,21 +92,7 @@ fun LoginScreen(
                 letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-/*            // --- FEATURE CARDS (PINDAH KE ATAS) ---
-            Text(
-                text = "Feature",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start).padding(bottom = 12.dp)
-            )
-            FeatureCard(Icons.Default.MonitorHeart, stringResource(R.string.ai_powered_training), Color(0xFFFF5252))
-            Spacer(modifier = Modifier.height(12.dp))
-            FeatureCard(Icons.Default.CalendarToday, stringResource(R.string.smart_scheduling), Color(0xFF40C4FF))*/
-
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(64.dp))
 
             // --- INPUT FIELDS ---
             OutlinedTextField(
@@ -139,25 +136,36 @@ fun LoginScreen(
                 singleLine = true
             )
 
+            if (loginState is LoginState.Error) {
+                Text(
+                    text = (loginState as LoginState.Error).message,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // --- TOMBOL LOGIN ---
-            GradientButton(
-                text = "Login",
-                icon = Icons.Default.Bolt,
-                onClick = {
-                    if (username.isNotEmpty() && password.isNotEmpty()) {
-                        onLoginSuccess()
+            if (loginState is LoginState.Loading) {
+                CircularProgressIndicator(color = CyanAccent)
+            } else {
+                GradientButton(
+                    text = "Login",
+                    icon = Icons.Default.Bolt,
+                    onClick = {
+                        viewModel.login(username, password)
                     }
-                }
-            )
+                )
+            }
 
             // --- TOMBOL BYPASS (LOGIN INSTAN) ---
             TextButton(
-                onClick = onLoginSuccess,
+                onClick = { viewModel.login("admin", "admin123") },
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Text("Bypass Login (Developer Mode)", color = CyanAccent.copy(alpha = 0.7f), fontSize = 12.sp)
+                Text("Login as Admin (Auto)", color = CyanAccent.copy(alpha = 0.7f), fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -171,10 +179,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedButton(
-                onClick = { onLoginSuccess() },
+                onClick = { /* Handle Registration */ },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                border = BoxShadowBorder(Color.DarkGray)
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.DarkGray)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
@@ -188,30 +196,11 @@ fun LoginScreen(
     }
 }
 
-private fun BoxShadowBorder(color: Color) = androidx.compose.foundation.BorderStroke(1.dp, color)
-
 // --- KOMPONEN UI ---
 
 @Composable
 fun GradientText(text: String, gradient: Brush, style: TextStyle) {
     Text(text = text, style = style.copy(brush = gradient))
-}
-
-@Composable
-fun FeatureCard(icon: ImageVector, text: String, color: Color) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .border(1.dp, Color.DarkGray, RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp)
-    ) {
-        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text = text, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
-    }
 }
 
 @Composable
@@ -230,13 +219,5 @@ fun GradientButton(text: String, icon: ImageVector, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = text, color = Color.Black, fontWeight = FontWeight.Bold)
         }
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun LoginPreview() {
-    SYNCRUNTheme {
-        LoginScreen()
     }
 }
