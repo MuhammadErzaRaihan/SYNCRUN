@@ -30,7 +30,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.R
 import com.example.syncrun.ui.theme.SYNCRUNTheme
 import com.example.syncrun.ui.theme.component.NavMenu
-import com.example.syncrun.ui.theme.component.SyncRunBottomBar
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -48,198 +47,176 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = viewModel(),
     onNavigateToRoute: (String) -> Unit = {}
 ) {
-    val currentNavMenu by viewModel.currentNavMenu.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val currentMonth by viewModel.currentMonth.collectAsState()
     val schedule by viewModel.schedule.collectAsState()
     val showAddDialog by viewModel.showAddEventDialog.collectAsState()
     val calendarDays by viewModel.calendarDays.collectAsState()
 
-    CalendarContent(
-        currentNavMenu = currentNavMenu,
-        selectedDate = selectedDate,
-        currentMonth = currentMonth,
-        schedule = schedule,
-        showAddDialog = showAddDialog,
-        calendarDays = calendarDays,
-        onSelectDate = { viewModel.selectDate(it) },
-        onNextMonth = { viewModel.nextMonth() },
-        onPreviousMonth = { viewModel.previousMonth() },
-        onToggleAddDialog = { viewModel.toggleAddEventDialog(it) },
-        onConfirmAddEvent = { title, time, code, mode, sess, loc, stat -> 
-            viewModel.addNewClass(title, time, code, mode, sess, loc, stat) 
-        },
-        onNavigateToRoute = onNavigateToRoute,
-        onUpdateNavMenu = { viewModel.updateNavMenu(it) }
-    )
-}
-
-@Composable
-fun CalendarContent(
-    currentNavMenu: NavMenu,
-    selectedDate: LocalDate,
-    currentMonth: YearMonth,
-    schedule: Map<Int, List<WorkoutSession>>,
-    showAddDialog: Boolean,
-    calendarDays: List<Int?>,
-    onSelectDate: (Int) -> Unit,
-    onNextMonth: () -> Unit,
-    onPreviousMonth: () -> Unit,
-    onToggleAddDialog: (Boolean) -> Unit,
-    onConfirmAddEvent: (String, String, String, String, String, String, String) -> Unit,
-    onNavigateToRoute: (String) -> Unit,
-    onUpdateNavMenu: (NavMenu) -> Unit
-) {
-    // Repository currently uses Day Int. Ideally it should be LocalDate or similar.
-    val todaysWorkout = schedule[selectedDate.dayOfMonth] ?: emptyList()
-
+    // Dialog tetap dipanggil di sini agar muncul di atas konten
     if (showAddDialog) {
         AddEventDialog(
-            onDismiss = { onToggleAddDialog(false) },
-            onConfirm = onConfirmAddEvent
+            onDismiss = { viewModel.toggleAddEventDialog(false) },
+            onConfirm = { title, time, code, mode, sess, loc, stat -> 
+                viewModel.addNewClass(title, time, code, mode, sess, loc, stat) 
+            }
         )
     }
 
-    Scaffold(
-        bottomBar = {
-            SyncRunBottomBar(
-                currentRoute = currentNavMenu,
-                onItemClick = { menu ->
-                    onUpdateNavMenu(menu)
-                    onNavigateToRoute(menu.name.lowercase())
-                },
-                onFabClick = { /* Aksi AI Coach */ }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onToggleAddDialog(true) },
-                containerColor = YellowAccent,
-                contentColor = Color.Black,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Event")
-            }
-        },
-        containerColor = DarkBackground
-    ) { innerPadding ->
-        Column(
+    Box(modifier = Modifier.fillMaxSize().background(DarkBackground)) {
+        CalendarContent(
+            selectedDate = selectedDate,
+            currentMonth = currentMonth,
+            schedule = schedule,
+            calendarDays = calendarDays,
+            onSelectDate = { viewModel.selectDate(it) },
+            onNextMonth = { viewModel.nextMonth() },
+            onPreviousMonth = { viewModel.previousMonth() },
+            onDeleteSession = { viewModel.deleteSession(it) }
+        )
+
+        // FAB diletakkan di dalam Box agar tetap melayang di atas list
+        FloatingActionButton(
+            onClick = { viewModel.toggleAddEventDialog(true) },
+            containerColor = YellowAccent,
+            contentColor = Color.Black,
+            shape = CircleShape,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 100.dp, end = 24.dp) // Offset agar tidak tertutup BottomBar global
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- HEADER BULAN & TAHUN ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onPreviousMonth) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Month", tint = Color.White)
-                }
-                
-                val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
-                Text(
-                    text = currentMonth.format(monthYearFormatter),
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-                
-                IconButton(onClick = onNextMonth) {
-                    Icon(Icons.Default.ChevronRight, contentDescription = "Next Month", tint = Color.White)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- NAMA HARI ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                val daysOfWeek = listOf(
-                    R.string.day_sun, R.string.day_mon, R.string.day_tue,
-                    R.string.day_wed, R.string.day_thu, R.string.day_fri, R.string.day_sat
-                )
-                daysOfWeek.forEach { dayRes ->
-                    Text(
-                        text = stringResource(dayRes),
-                        color = TextGray,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // --- GRID TANGGAL ---
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(7),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(calendarDays) { date ->
-                    if (date != null) {
-                        val hasWorkout = schedule.containsKey(date)
-                        val workoutType = schedule[date]?.firstOrNull()?.type ?: ""
-
-                        CalendarDayItem(
-                            date = date,
-                            isSelected = selectedDate.dayOfMonth == date && selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year,
-                            hasWorkout = hasWorkout,
-                            workoutType = workoutType,
-                            onClick = { onSelectDate(date) }
-                        )
-                    } else {
-                        Box(modifier = Modifier.size(44.dp).padding(4.dp))
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- KARTU JADWAL ---
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                if (todaysWorkout.isEmpty()) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
-                            Text(stringResource(R.string.no_schedule), color = TextGray)
-                        }
-                    }
-                } else {
-                    items(todaysWorkout) { workout ->
-                        if (workout.type == "CLASS") {
-                            ClassDetailCard(workout)
-                        } else {
-                            WorkoutDetailCard(workout)
-                        }
-                    }
-                }
-                item { Spacer(modifier = Modifier.height(80.dp)) }
-            }
+            Icon(Icons.Default.Add, contentDescription = "Add Event")
         }
     }
 }
 
 @Composable
-fun ClassDetailCard(workout: WorkoutSession) {
+fun CalendarContent(
+    selectedDate: LocalDate,
+    currentMonth: YearMonth,
+    schedule: Map<Int, List<WorkoutSession>>,
+    calendarDays: List<Int?>,
+    onSelectDate: (Int) -> Unit,
+    onNextMonth: () -> Unit,
+    onPreviousMonth: () -> Unit,
+    onDeleteSession: (WorkoutSession) -> Unit
+) {
+    val todaysWorkout = schedule[selectedDate.dayOfMonth] ?: emptyList()
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- HEADER BULAN & TAHUN ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onPreviousMonth) {
+                Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Month", tint = Color.White)
+            }
+            
+            val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
+            Text(
+                text = currentMonth.format(monthYearFormatter),
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            
+            IconButton(onClick = onNextMonth) {
+                Icon(Icons.Default.ChevronRight, contentDescription = "Next Month", tint = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- NAMA HARI ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            val daysOfWeek = listOf(
+                R.string.day_sun, R.string.day_mon, R.string.day_tue,
+                R.string.day_wed, R.string.day_thu, R.string.day_fri, R.string.day_sat
+            )
+            daysOfWeek.forEach { dayRes ->
+                Text(
+                    text = stringResource(dayRes),
+                    color = TextGray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // --- GRID TANGGAL ---
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(7),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            items(calendarDays) { date ->
+                if (date != null) {
+                    val hasWorkout = schedule.containsKey(date)
+                    val workoutType = schedule[date]?.firstOrNull()?.type ?: ""
+
+                    CalendarDayItem(
+                        date = date,
+                        isSelected = selectedDate.dayOfMonth == date && selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year,
+                        hasWorkout = hasWorkout,
+                        workoutType = workoutType,
+                        onClick = { onSelectDate(date) }
+                    )
+                } else {
+                    Box(modifier = Modifier.size(44.dp).padding(4.dp))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- KARTU JADWAL ---
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            if (todaysWorkout.isEmpty()) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+                        Text(stringResource(R.string.no_schedule), color = TextGray)
+                    }
+                }
+            } else {
+                items(todaysWorkout) { workout ->
+                    if (workout.type == "CLASS") {
+                        ClassDetailCard(workout, onDelete = { onDeleteSession(workout) })
+                    } else {
+                        WorkoutDetailCard(workout, onDelete = { onDeleteSession(workout) })
+                    }
+                }
+            }
+            item { Spacer(modifier = Modifier.height(100.dp)) } // Padding bawah ekstra untuk BottomBar global
+        }
+    }
+}
+
+@Composable
+fun ClassDetailCard(workout: WorkoutSession, onDelete: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -247,33 +224,38 @@ fun ClassDetailCard(workout: WorkoutSession) {
             .background(CardBackground)
             .padding(20.dp)
     ) {
-        // Baris Atas: Kode Kelas & Badge Status
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = workout.classCode ?: "CLASS",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-            
-            if (!workout.status.isNullOrEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                ) {
-                    Text(workout.status, color = Color.White, fontSize = 10.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = workout.classCode ?: "CLASS",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                
+                if (!workout.status.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                        Text(workout.status, color = Color.White, fontSize = 10.sp)
+                    }
                 }
+            }
+
+            IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.7f), modifier = Modifier.size(18.dp))
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Nama Mata Kuliah
         Text(
             text = workout.title,
             color = Color.White,
@@ -283,7 +265,6 @@ fun ClassDetailCard(workout: WorkoutSession) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Detail dengan Ikon
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             if (!workout.deliveryMode.isNullOrEmpty()) {
                 DetailRow(Icons.Default.Info, workout.deliveryMode)
@@ -471,7 +452,7 @@ fun CalendarDayItem(
 }
 
 @Composable
-fun WorkoutDetailCard(workout: WorkoutSession) {
+fun WorkoutDetailCard(workout: WorkoutSession, onDelete: () -> Unit) {
     val (icon, iconTint, typeLabel) = when (workout.type) {
         "REST" -> Triple(Icons.Default.NightlightRound, Color(0xFFB388FF), stringResource(R.string.workout_type_rest))
         "STRENGTH" -> Triple(Icons.Default.FitnessCenter, Color(0xFFFF5252), stringResource(R.string.workout_type_strength))
@@ -487,15 +468,25 @@ fun WorkoutDetailCard(workout: WorkoutSession) {
             .background(CardBackground)
             .padding(20.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.size(32.dp).clip(CircleShape).background(iconTint.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(32.dp).clip(CircleShape).background(iconTint.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(16.dp))
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(typeLabel, color = iconTint, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(typeLabel, color = iconTint, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            
+            IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.7f), modifier = Modifier.size(18.dp))
+            }
         }
         Spacer(modifier = Modifier.height(12.dp))
         Text(workout.title, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -507,37 +498,7 @@ fun WorkoutDetailCard(workout: WorkoutSession) {
 @Preview(showBackground = true)
 @Composable
 fun CalendarScreenPreview() {
-    val sampleSchedule = mapOf(
-        15 to listOf(
-            WorkoutSession(
-                type = "CLASS", 
-                title = "Business Research and Trend Forecasting", 
-                duration = "11:20 - 13:00 GMT+7",
-                classCode = "LE51 - LEC",
-                deliveryMode = "F2F",
-                session = "Session 1",
-                location = "Alam Sutera Main Campus - A1103",
-                status = "Onsite Class"
-            ),
-            WorkoutSession(type = "EASY RUN", title = "Morning Run", duration = "30 min")
-        )
-    )
-
     SYNCRUNTheme {
-        CalendarContent(
-            currentNavMenu = NavMenu.CALENDAR,
-            selectedDate = LocalDate.now(),
-            currentMonth = YearMonth.now(),
-            schedule = sampleSchedule,
-            showAddDialog = false,
-            calendarDays = (1..31).toList(),
-            onSelectDate = {},
-            onNextMonth = {},
-            onPreviousMonth = {},
-            onToggleAddDialog = {},
-            onConfirmAddEvent = { _, _, _, _, _, _, _ -> },
-            onNavigateToRoute = {},
-            onUpdateNavMenu = {}
-        )
+        CalendarScreen()
     }
 }

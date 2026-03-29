@@ -57,4 +57,28 @@ object ScheduleRepository {
         current[date] = existingSessions + session
         _schedule.value = current
     }
+
+    /**
+     * Menghapus semua jadwal pada tanggal tertentu
+     */
+    fun deleteScheduleForDate(date: Int) {
+        val current = _schedule.value.toMutableMap()
+        current.remove(date)
+        _schedule.value = current
+    }
+
+    /**
+     * Menghapus satu sesi spesifik pada tanggal tertentu
+     */
+    fun deleteSessionFromDate(date: Int, session: WorkoutSession) {
+        val current = _schedule.value.toMutableMap()
+        val sessions = current[date]?.toMutableList() ?: return
+        sessions.remove(session)
+        if (sessions.isEmpty()) {
+            current.remove(date)
+        } else {
+            current[date] = sessions
+        }
+        _schedule.value = current
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.syncrun.ui.theme.screen.user
 
-import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,161 +17,126 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-
-// Import Bottom Bar
-import com.example.syncrun.ui.theme.component.NavMenu
-import com.example.syncrun.ui.theme.component.SyncRunBottomBar
+import com.example.syncrun.R
+import com.example.syncrun.ui.theme.SYNCRUNTheme
 
 // --- TEMA WARNA LOKAL ---
-private val DarkBackground = Color(0xFF16171D)
-private val CardBackground = Color(0xFF22232A)
 private val YellowAccent = Color(0xFFC6FF00)
 private val CyanAccent = Color(0xFF00E5FF)
 private val TextGray = Color(0xFF9E9E9E)
+private val CardBackground = Color(0xFF22232A)
 
 @Composable
 fun UserScreen(
-    viewModel: UserViewModel = viewModel(),
     onNavigateToRoute: (String) -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {}
 ) {
-    val currentNavMenu by viewModel.currentNavMenu.collectAsState()
-    val userName by viewModel.userName.collectAsState()
-    val userEmail by viewModel.userEmail.collectAsState()
-    val totalRuns by viewModel.totalRuns.collectAsState()
-    val totalDistance by viewModel.totalDistance.collectAsState()
-    val activeGoal by viewModel.activeGoal.collectAsState()
-
-    Scaffold(
-        bottomBar = {
-            SyncRunBottomBar(
-                currentRoute = currentNavMenu,
-                onItemClick = { menu ->
-                    viewModel.updateNavMenu(menu)
-                    onNavigateToRoute(menu.name.lowercase())
-                },
-                onFabClick = { /* Buka AI Coach */ }
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally // Membuat konten rata tengah
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
-            // --- HEADER: FOTO PROFIL & NAMA (CENTERED) ---
+            // --- PROFIL HEADER ---
             item {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface)
-                        .border(2.dp, CyanAccent, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = null, tint = TextGray, modifier = Modifier.size(50.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, YellowAccent, CircleShape)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_launcher_background), // Ganti dengan foto user
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("e", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    Text("Marathoner • Binusian 26", color = TextGray, fontSize = 14.sp)
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(userName, color = MaterialTheme.colorScheme.onBackground, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(userEmail, color = TextGray, fontSize = 14.sp)
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // --- KARTU STATISTIK ---
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            // --- STATS RINGKAS ---
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    StatBox(modifier = Modifier.weight(1f), label = "RUNS", value = totalRuns, color = YellowAccent)
-                    StatBox(modifier = Modifier.weight(1f), label = "DISTANCE", value = totalDistance, color = CyanAccent)
-                    StatBox(modifier = Modifier.weight(1f), label = "GOAL", value = activeGoal, color = MaterialTheme.colorScheme.onBackground)
+                    ProfileStatCard(Modifier.weight(1f), "128", "KM RUN")
+                    ProfileStatCard(Modifier.weight(1f), "12", "EVENTS")
+                    ProfileStatCard(Modifier.weight(1f), "Gold", "RANK")
                 }
-                Spacer(modifier = Modifier.height(32.dp))
             }
 
-            // --- MENU PENGATURAN ---
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            // --- MENU LIST ---
             item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surface)
+                        .background(CardBackground)
                 ) {
-                    MenuRow(icon = Icons.Default.Edit, title = "Edit Profile")
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
-
-                    MenuRow(icon = Icons.Default.Flag, title = "My Goals")
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
-
-                    MenuRow(icon = Icons.Default.Settings, title = "Settings", onClick = onSettingsClick)
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
-
-                    MenuRow(icon = Icons.Default.HelpOutline, title = "Help & Support")
+                    MenuItem(Icons.Default.Person, "Edit Profile") { }
+                    Divider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    MenuItem(Icons.Default.Settings, "Settings", onClick = onSettingsClick)
+                    Divider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    MenuItem(Icons.Default.Shield, "Privacy & Security") { }
+                    Divider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    MenuItem(Icons.Default.Help, "Help Center") { }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
             }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // --- LOGOUT BUTTON ---
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFFF1744).copy(alpha = 0.1f))
-                        .border(1.dp, Color(0xFFFF1744), RoundedCornerShape(12.dp))
-                        .clickable { onLogoutClick() },
-                    contentAlignment = Alignment.Center
+                TextButton(
+                    onClick = onLogoutClick,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Logout, contentDescription = null, tint = Color(0xFFFF1744))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("LOGOUT", color = Color(0xFFFF1744), fontWeight = FontWeight.Bold)
-                    }
+                    Text("Logout", color = Color.Red.copy(alpha = 0.8f), fontWeight = FontWeight.Bold)
                 }
-                Spacer(modifier = Modifier.height(32.dp))
             }
+
+            item { Spacer(modifier = Modifier.height(100.dp)) } // Extra padding for BottomBar
         }
     }
 }
 
-// ==========================================
-// KOMPONEN PENDUKUNG
-// ==========================================
-
 @Composable
-fun StatBox(modifier: Modifier, label: String, value: String, color: Color) {
+fun ProfileStatCard(modifier: Modifier, value: String, label: String) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(vertical = 16.dp),
+            .background(CardBackground)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(value, color = color, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(label, color = TextGray, fontSize = 10.sp, letterSpacing = 0.5.sp)
+        Text(value, color = CyanAccent, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = TextGray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-fun MenuRow(icon: ImageVector, title: String, onClick: () -> Unit = {}) {
+fun MenuItem(icon: ImageVector, title: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -179,22 +144,17 @@ fun MenuRow(icon: ImageVector, title: String, onClick: () -> Unit = {}) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = TextGray, modifier = Modifier.size(24.dp))
+        Icon(icon, contentDescription = null, tint = YellowAccent, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(title, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextGray)
+        Text(title, color = Color.White, fontSize = 14.sp, modifier = Modifier.weight(1f))
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextGray, modifier = Modifier.size(20.dp))
     }
 }
 
-// --- PREVIEW ---
-@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showSystemUi = true)
 @Composable
 fun UserScreenPreview() {
-    UserScreen(
-        viewModel = UserViewModel(),
-        onNavigateToRoute = {},
-        onLogoutClick = {},
-        onSettingsClick = {}
-    )
+    SYNCRUNTheme {
+        UserScreen()
+    }
 }

@@ -51,8 +51,10 @@
     <string name="ai_powered_training">Latihan berbasis AI</string>
     <string name="smart_scheduling">Penjadwalan pintar</string>
     <string name="budget_optimized_nutrition">Nutrisi ramah kantong</string>
-    <string name="continue_with_gmail">LANJUTKAN DENGAN GMAIL</string>
+    <string name="continue_with_gmail">Registrasi</string>
     <string name="skip_login_prototype">Lewati Login (Mode Prototipe)</string>
+    <string name="not_have_account">Belum Punya Akun?</string>
+
 
     <!-- Setup Screens -->
     <string name="setup_progress">PROGRES SETUP</string>

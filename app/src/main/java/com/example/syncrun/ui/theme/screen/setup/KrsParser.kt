@@ -1,119 +1,138 @@
 package com.example.syncrun.ui.theme.screen.setup
 
 import com.example.syncrun.ui.theme.screen.calendar.WorkoutSession
+import java.time.DayOfWeek
+import java.time.LocalDate
 
 object KrsParser {
     fun parseTextToSchedule(text: String): Map<Int, List<WorkoutSession>> {
         val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
         val detectedSchedule = mutableMapOf<Int, MutableList<WorkoutSession>>()
         
-        // --- FORMAT 1 (Portal Akademik - Fallback) ---
-        val daysMap = mapOf(
-            "senin" to listOf(5, 12, 19, 26),
-            "selasa" to listOf(6, 13, 20, 27),
-            "rabu" to listOf(7, 14, 21, 28),
-            "kamis" to listOf(1, 8, 15, 22, 29),
-            "jumat" to listOf(2, 9, 16, 23, 30),
-            "sabtu" to listOf(3, 10, 17, 24, 31),
-            "minggu" to listOf(4, 11, 18, 25)
-        )
+        // --- LOGIKA PENENTUAN TANGGAL BERDASARKAN HARI (Untuk Feb 2026) ---
+        // Senin di Feb 2026 jatuh pada tanggal: 2, 9, 16, 23
+        fun getDatesForDay(dayName: String): List<Int> {
+            return when (dayName.lowercase()) {
+                "senin", "monday" -> listOf(2, 9, 16, 23)
+                "selasa", "tuesday" -> listOf(3, 10, 17, 24)
+                "rabu", "wednesday" -> listOf(4, 11, 18, 25)
+                "kamis", "thursday" -> listOf(5, 12, 19, 26)
+                "jumat", "friday" -> listOf(6, 13, 20, 27)
+                "sabtu", "saturday" -> listOf(7, 14, 21, 28)
+                "minggu", "sunday" -> listOf(1, 8, 15, 22) // 1 Feb adalah Minggu
+                else -> emptyList()
+            }
+        }
 
-        var potentialSubject = ""
+        // --- FORMAT 1 (Portal Akademik / Deteksi Berdasarkan Nama Hari "SELASA") ---
+        var currentDetectedDayFromHeader: String? = null
+        val allDays = listOf("senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+        
         for (i in lines.indices) {
             val line = lines[i]
             val lowerLine = line.lowercase()
-            if (lowerLine == "dosen ampu" && i > 0) potentialSubject = lines[i - 1]
-            if (lowerLine == "jadwal" && i + 2 < lines.size) {
-                val dayStr = lines[i + 1].lowercase()
-                val timeStr = lines[i + 2]
-                val dayEntry = daysMap.entries.find { dayStr.contains(it.key) }
-                if (dayEntry != null) {
-                    val displaySubject = potentialSubject.ifEmpty { "Mata Kuliah" }
-                    dayEntry.value.forEach { date ->
-                        val session = WorkoutSession(type = "CLASS", title = displaySubject, duration = timeStr, isCompleted = false)
+
+            // Cek jika baris adalah Nama Hari (Header seperti di Gambar 1)
+            if (allDays.contains(lowerLine)) {
+                currentDetectedDayFromHeader = lowerLine
+                continue
+            }
+
+            // Deteksi Jam (07:20 - 09:00)
+            val timeMatch = Regex("""(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})""").find(line)
+            
+            if (timeMatch != null && currentDetectedDayFromHeader != null) {
+                val timeStr = timeMatch.value
+                val targetDates = getDatesForDay(currentDetectedDayFromHeader)
+                
+                // Cari Judul (biasanya 2-3 baris di atas jam)
+                var subject = ""
+                for (j in i - 1 downTo maxOf(0, i - 4)) {
+                    val l = lines[j]
+                    if (l.length > 5 && !allDays.contains(l.lowercase()) && !l.contains(" - ")) {
+                        subject = l
+                        break
+                    }
+                }
+
+                // Cari Detail lain (F2F, Session, Location)
+                var classCode = ""; var deliveryMode = ""; var sessionLabel = ""; var location = ""
+                for (k in maxOf(0, i - 5) until i + 3) {
+                    if (k >= lines.size) break
+                    val l = lines[k]
+                    val lowL = l.lowercase()
+                    when {
+                        l.contains(" - ") && l.length < 15 -> classCode = l
+                        lowL.contains("f2f") || lowL.contains("gslc") -> deliveryMode = l
+                        lowL.contains("session") -> sessionLabel = l
+                        lowL.contains("campus") || lowL.contains("main") -> location = l
+                    }
+                }
+
+                if (subject.isNotEmpty()) {
+                    targetDates.forEach { date ->
+                        val session = WorkoutSession(
+                            type = "CLASS", title = subject, duration = timeStr,
+                            classCode = classCode, deliveryMode = deliveryMode,
+                            session = sessionLabel, location = location, isCompleted = false
+                        )
                         val list = detectedSchedule.getOrPut(date) { mutableListOf() }
-                        if (list.none { it.title == displaySubject && it.duration == timeStr }) list.add(session)
+                        if (list.none { it.title == subject && it.duration == timeStr }) list.add(session)
                     }
                 }
             }
         }
 
-        // --- FORMAT 2 (Binus Mobile / Modern) ---
+        // --- FORMAT 2 (Binus Mobile - Deteksi Berdasarkan Tanggal Spesifik "02 February 2026") ---
         var lastDetectedDay: Int? = null
         val monthNames = listOf("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december")
         
         for (i in lines.indices) {
             val line = lines[i]
-            
-            // 1. Deteksi Tanggal (02 February 2026)
             val dateMatch = Regex("""(\d{1,2})\s+(${monthNames.joinToString("|")})\s+(\d{4})""", RegexOption.IGNORE_CASE).find(line)
             if (dateMatch != null) {
                 lastDetectedDay = dateMatch.groupValues[1].toInt()
                 continue
             }
 
-            // 2. Deteksi Jam (11:20 - 13:00 GMT+7)
             val timeMatch = Regex("""(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})(.*)""").find(line)
-            val currentDate = lastDetectedDay
-            
-            if (timeMatch != null && currentDate != null) {
+            if (timeMatch != null && lastDetectedDay != null) {
                 val timeStr = timeMatch.value
+                val currentDate = lastDetectedDay
                 
-                // Cari Header Kelas ke atas (misal "LE51 - LEC")
+                // Ambil Header (LE51 - LEC)
                 var headerIndex = -1
                 var classCode = ""
-                for (j in i - 1 downTo maxOf(0, i - 15)) {
-                    val l = lines[j]
-                    if (l.contains(" - ") && l.any { it.isUpperCase() } && l.length < 30) {
+                for (j in i - 1 downTo maxOf(0, i - 10)) {
+                    if (lines[j].contains(" - ") && lines[j].length < 15) {
                         headerIndex = j
-                        classCode = l
+                        classCode = lines[j]
                         break
                     }
                 }
 
                 if (headerIndex != -1) {
-                    var subject = ""
-                    var deliveryMode = ""
-                    var sessionLabel = ""
-                    var location = ""
-                    var status = ""
-
-                    // Scan baris di antara Header dan Time
+                    var subject = ""; var deliveryMode = ""; var sessionLabel = ""; var location = ""; var status = ""
                     for (k in headerIndex + 1 until i) {
                         val original = lines[k]
                         val l = original.lowercase()
-                        
                         when {
-                            l.contains("f2f") || l.contains("gslc") || l.contains("online") -> deliveryMode = original
+                            l.contains("f2f") || l.contains("gslc") -> deliveryMode = original
                             l.contains("session") -> sessionLabel = original
-                            l.contains("campus") || l.contains("alam sutera") || l.contains("main") -> location = original
-                            l.contains("onsite class") || l.contains("online class") -> status = original
+                            l.contains("campus") || l.contains("sutera") -> location = original
+                            l.contains("class") -> status = original
                             original.length > 5 && subject.isEmpty() -> subject = original
                         }
                     }
                     
-                    // Kadang location ada di bawah time
-                    if (location.isEmpty() && i + 1 < lines.size) {
-                        val nextLine = lines[i+1]
-                        if (nextLine.lowercase().contains("campus")) location = nextLine
-                    }
-
                     if (subject.isNotEmpty()) {
                         val session = WorkoutSession(
-                            type = "CLASS", 
-                            title = subject, 
-                            duration = timeStr,
-                            classCode = classCode,
-                            deliveryMode = deliveryMode,
-                            session = sessionLabel,
-                            location = location,
-                            status = status,
-                            isCompleted = false
+                            type = "CLASS", title = subject, duration = timeStr,
+                            classCode = classCode, deliveryMode = deliveryMode,
+                            session = sessionLabel, location = location, status = status, isCompleted = false
                         )
                         val list = detectedSchedule.getOrPut(currentDate) { mutableListOf() }
-                        if (list.none { it.title == subject && it.duration == timeStr }) {
-                            list.add(session)
-                        }
+                        if (list.none { it.title == subject && it.duration == timeStr }) list.add(session)
                     }
                 }
             }

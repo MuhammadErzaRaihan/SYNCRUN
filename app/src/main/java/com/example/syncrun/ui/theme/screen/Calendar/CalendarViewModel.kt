@@ -117,9 +117,11 @@ class CalendarViewModel : ViewModel() {
             status = if (status.isNotEmpty()) status else null,
             isCompleted = false
         )
-        // Note: ScheduleRepository currently uses day Int as key. 
-        // We should ideally use full date, but for now we use the selected date's day.
         ScheduleRepository.addSingleEvent(_selectedDate.value.dayOfMonth, newSession)
         _showAddEventDialog.value = false
+    }
+
+    fun deleteSession(session: WorkoutSession) {
+        ScheduleRepository.deleteSessionFromDate(_selectedDate.value.dayOfMonth, session)
     }
 }

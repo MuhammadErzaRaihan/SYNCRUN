@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.R
-import com.example.syncrun.ui.theme.component.SyncRunBottomBar
 
 // --- TEMA WARNA LOKAL ---
 private val YellowAccent = Color(0xFFC6FF00)
@@ -39,28 +38,19 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
     onNavigateToRoute: (String) -> Unit = {}
 ) {
-    val currentNavMenu by viewModel.currentNavMenu.collectAsState()
     val currentWeight by viewModel.currentWeight.collectAsState()
     val totalKm by viewModel.totalKm.collectAsState()
     val targetWeight by viewModel.targetWeight.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            SyncRunBottomBar(
-                currentRoute = currentNavMenu,
-                onItemClick = { menu ->
-                    viewModel.updateNavMenu(menu)
-                    onNavigateToRoute(menu.name.lowercase())
-                },
-                onFabClick = { /* Buka AI Coach */ }
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
+    // Menggunakan Box sebagai container utama, bukan Scaffold redundan
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -78,7 +68,9 @@ fun HomeScreen(
             item { ThisWeekSection() }
             item { QuickActionsSection() }
             item { RunningAcademySection() }
-            item { Spacer(modifier = Modifier.height(32.dp)) }
+            
+            // Spacer bawah agar konten tidak tertutup oleh BottomBar global
+            item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
 }

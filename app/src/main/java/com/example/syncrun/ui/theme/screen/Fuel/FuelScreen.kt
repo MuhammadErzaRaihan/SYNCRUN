@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.syncrun.R
-import com.example.syncrun.ui.theme.component.SyncRunBottomBar
+import com.example.syncrun.ui.theme.SYNCRUNTheme
 
 // --- TEMA WARNA LOKAL ---
 private val YellowAccent = Color(0xFFC6FF00)
@@ -36,7 +36,6 @@ fun FuelScreen(
     viewModel: FuelViewModel = viewModel(),
     onNavigateToRoute: (String) -> Unit = {}
 ) {
-    val currentNavMenu by viewModel.currentNavMenu.collectAsState()
     val spentBudget by viewModel.spentBudget.collectAsState()
     val dailyBudget by viewModel.dailyBudget.collectAsState()
     val caloriesConsumed by viewModel.caloriesConsumed.collectAsState()
@@ -44,23 +43,10 @@ fun FuelScreen(
     val macros by viewModel.macros.collectAsState()
     val meals by viewModel.meals.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            SyncRunBottomBar(
-                currentRoute = currentNavMenu,
-                onItemClick = { menu ->
-                    viewModel.updateNavMenu(menu)
-                    onNavigateToRoute(menu.name.lowercase())
-                },
-                onFabClick = { /* Buka AI Coach */ }
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -165,7 +151,7 @@ fun FuelScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(32.dp)) }
+            item { Spacer(modifier = Modifier.height(100.dp)) } // Extra padding for BottomBar
         }
     }
 }
@@ -264,5 +250,7 @@ fun MealCard(meal: Meal) {
 @Preview(showSystemUi = true)
 @Composable
 fun FuelScreenPreview() {
-    FuelScreen(viewModel = FuelViewModel())
+    SYNCRUNTheme {
+        FuelScreen()
+    }
 }

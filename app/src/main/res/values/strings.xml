@@ -51,8 +51,10 @@
     <string name="ai_powered_training">AI-powered training</string>
     <string name="smart_scheduling">Smart scheduling</string>
     <string name="budget_optimized_nutrition">Budget-optimized nutrition</string>
-    <string name="continue_with_gmail">CONTINUE WITH GMAIL</string>
+    <string name="continue_with_gmail">Registration</string>
     <string name="skip_login_prototype">Skip Login (Prototype Mode)</string>
+    <string name="not_have_account">Not Have Account Yet?</string>
+
 
     <!-- Setup Screens -->
     <string name="setup_progress">SETUP PROGRESS</string>
