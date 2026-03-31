@@ -8,20 +8,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.syncrun.R
+import com.example.syncrun.ui.theme.SYNCRUNTheme
 
 // --- TEMA WARNA LOKAL ---
 private val DarkBackground = Color(0xFF16171D)
@@ -30,7 +30,6 @@ private val YellowAccent = Color(0xFFC6FF00)
 private val CyanAccent = Color(0xFFFFEB3B)
 private val TextGray = Color(0xFF9E9E9E)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel = viewModel(),
@@ -38,6 +37,28 @@ fun ChatScreen(
 ) {
     val messages by viewModel.messages.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    // Masukkan API Key Anda di sini secara manual atau melalui setup
+    LaunchedEffect(Unit) {
+        viewModel.setApiKey("")
+    }
+
+    ChatScreenContent(
+        messages = messages,
+        isLoading = isLoading,
+        onBackClick = onBackClick,
+        onSendMessage = { viewModel.sendMessage(it) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatScreenContent(
+    messages: List<ChatMessage>,
+    isLoading: Boolean,
+    onBackClick: () -> Unit,
+    onSendMessage: (String) -> Unit
+) {
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
@@ -46,11 +67,6 @@ fun ChatScreen(
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
-    }
-
-    // Masukkan API Key Anda di sini secara manual atau melalui setup
-    LaunchedEffect(Unit) {
-        viewModel.setApiKey("AIzaSyCTQtZ5BvdufccBbstvrsIRO1jg1yty-Zk")
     }
 
     Scaffold(
@@ -64,7 +80,7 @@ fun ChatScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
@@ -131,7 +147,7 @@ fun ChatScreen(
                     IconButton(
                         onClick = {
                             if (inputText.isNotBlank()) {
-                                viewModel.sendMessage(inputText)
+                                onSendMessage(inputText)
                                 inputText = ""
                             }
                         },
@@ -140,7 +156,7 @@ fun ChatScreen(
                             .background(if (inputText.isNotBlank()) YellowAccent else Color.DarkGray)
                     ) {
                         Icon(
-                            Icons.Default.Send, 
+                            Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Send", 
                             tint = Color.Black,
                             modifier = Modifier.size(20.dp)
@@ -187,6 +203,23 @@ fun ChatBubble(msg: ChatMessage) {
             fontSize = 10.sp,
             color = TextGray,
             fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatScreenPreview() {
+    SYNCRUNTheme {
+        ChatScreenContent(
+            messages = listOf(
+                ChatMessage("model", "Halo! Saya AI Coach SYNCRUN. Ada yang bisa saya bantu?"),
+                ChatMessage("user", "Bagaimana cara meningkatkan stamina lari saya?"),
+                ChatMessage("model", "Untuk meningkatkan stamina, Anda bisa mencoba latihan interval dan meningkatkan jarak lari secara bertahap.")
+            ),
+            isLoading = false,
+            onBackClick = {},
+            onSendMessage = {}
         )
     }
 }

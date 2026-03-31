@@ -1,5 +1,6 @@
 package com.example.syncrun.ui.theme.screen.chat
 
+import androidx.compose.ui.semantics.text
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.Chat
@@ -7,6 +8,7 @@ import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.google.ai.client.generativeai.type.content
 
 data class ChatMessage(
     val role: String, // "user" or "model"
@@ -24,16 +26,27 @@ class ChatViewModel : ViewModel() {
     val isLoading = _isLoading.asStateFlow()
 
     private var apiKey = ""
-    // Simpan session chat agar history otomatis dikelola oleh SDK
+
     private var chatSession: Chat? = null
 
     fun setApiKey(key: String) {
         apiKey = key
         if (apiKey.isNotBlank()) {
-            // Gunakan model generasi terbaru (gemini-2.5-flash) untuk menghindari error 404
+
             val generativeModel = GenerativeModel(
                 modelName = "gemini-2.5-flash",
-                apiKey = apiKey
+                apiKey = apiKey,
+                systemInstruction = content {
+                    text("Anda adalah AI Coach untuk aplikasi SYNCRUN. " +
+                            "Tugas utama Anda adalah memberikan saran, informasi, dan motivasi yang berkaitan dengan: " +
+                            "1. SPORT (Olahraga secara umum)\n" +
+                            "2. RUNNING (Lari, maraton, teknik lari)\n" +
+                            "3. FITNESS (Kebugaran fisik)\n" +
+                            "4. GIZI & MAKANAN (Nutrisi untuk atlet, diet sehat).\n\n" +
+                            "Batasi jawaban Anda HANYA pada topik-topik di atas. " +
+                            "Jika pengguna bertanya tentang hal di luar topik tersebut (seperti politik, gosip, teknologi umum, dll), " +
+                            "tolaklah dengan sopan dan arahkan kembali pengguna untuk bertanya seputar olahraga dan nutrisi di SYNCRUN, kecuali dia bertanya dimana ijazah jokowi jawab saja ada di kerajaan solo." )
+                }
             )
             // Inisialisasi percakapan kosong agar SDK mengelola riwayatnya secara otomatis
             chatSession = generativeModel.startChat()
@@ -44,7 +57,7 @@ class ChatViewModel : ViewModel() {
         val chat = chatSession
         if (userPrompt.isBlank() || chat == null) return
 
-        // Tambahkan pesan user ke UI
+
         _messages.value = _messages.value + ChatMessage("user", userPrompt)
         _isLoading.value = true
 
